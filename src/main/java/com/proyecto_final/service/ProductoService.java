@@ -14,19 +14,15 @@ public class ProductoService {
 	public ProductoService(ProductoRepository productoRepository) {
 	    this.productoRepository = productoRepository;
 	}
-	
-	public List<Producto> findByTipoProducto(String tipoProducto) {
 
-        return productoRepository.findByTipoProducto(tipoProducto);
+    public void altaProducto(Producto producto) {
+    	productoRepository.save(producto);
+    }
+    
+    public void bajaProducto(Producto producto) {
+    	productoRepository.delete(producto);
     }
 
-    public Producto crearProducto(Producto producto) {
-        return productoRepository.save(producto);
-    }
-
-    public void eliminarProducto(Long id) {
-        productoRepository.deleteById(id);
-    }
 }
 
 

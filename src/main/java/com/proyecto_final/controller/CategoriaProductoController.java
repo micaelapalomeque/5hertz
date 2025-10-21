@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.proyecto_final.service.CategoriaProductoService;
-
 import request.AgregarCategoriaRequest;
+import request.EliminarCategoriaRequest;
 
 @RestController
 @RequestMapping("/categorias")
@@ -26,18 +26,10 @@ public class CategoriaProductoController {
 		servicio.agregarCategoria(objeto.getNombre(), objeto.getDescripcion());
 	}
 	
-	@DeleteMapping ("/{id}")
-	public ResponseEntity<String> eliminarCategoria(@PathVariable int id)
+	@DeleteMapping
+	public void eliminarCategoria(@RequestBody EliminarCategoriaRequest request)
 	{
-		  boolean eliminada = servicio.eliminarCategoria(id);
-		    if (eliminada) 
-		    {
-		        return ResponseEntity.ok("Categoría eliminada correctamente");
-		    } 
-		    else 
-		    {
-		        return ResponseEntity.status(404).body("Categoría no encontrada");
-		    }
+		  servicio.eliminarCategoria(request.getNombre());
 	}
 	
 }

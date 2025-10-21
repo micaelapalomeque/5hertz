@@ -1,5 +1,6 @@
 package com.proyecto_final.service;
 
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.proyecto_final.repository.CategoriaProductoRepository;
 import com.proyecto_final.model.CategoriaProducto;
@@ -19,16 +20,16 @@ public class CategoriaProductoService {
 		repositorio.save(categoriaProducto);
 	}
 	
-	public boolean eliminarCategoria(int id)
-	{
-		if (repositorio.existsById(id))
-		{
-			repositorio.deleteById(id);
-			return true; 
-		}
-		else 
-		{
-			return false; 
-		}
+	public void eliminarCategoria(String nombre) {
+	    Optional<CategoriaProducto> opt = repositorio.findByNombre(nombre);   
+	    if (opt.isPresent()) {
+	        CategoriaProducto categoria = opt.get();
+	        repositorio.delete(categoria);
+	    }
+	}
+	
+	public Optional<CategoriaProducto> findByNombre(String nombre) {
+		return repositorio.findByNombre(nombre);
 	}
 }
+

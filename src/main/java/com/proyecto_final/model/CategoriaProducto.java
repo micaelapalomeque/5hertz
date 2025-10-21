@@ -27,6 +27,12 @@ public class CategoriaProducto {
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
+    public int getId() {
+    	return this.idCategoria;
+    }
+    public int getIdCategoria() {
+    	return this.idCategoria;
+    }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public String getDescripcion() { return descripcion; }
