@@ -18,5 +18,17 @@ public class CategoriaProductoService {
 		CategoriaProducto categoriaProducto = new CategoriaProducto(nombre, descripcion);
 		repositorio.save(categoriaProducto);
 	}
-
+	
+	public boolean eliminarCategoria(int id)
+	{
+		if (repositorio.existsById(id))
+		{
+			repositorio.deleteById(id);
+			return true; 
+		}
+		else 
+		{
+			return false; 
+		}
+	}
 }

@@ -1,5 +1,8 @@
 package com.proyecto_final.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,5 +26,18 @@ public class CategoriaProductoController {
 		servicio.agregarCategoria(objeto.getNombre(), objeto.getDescripcion());
 	}
 	
+	@DeleteMapping ("/{id}")
+	public ResponseEntity<String> eliminarCategoria(@PathVariable int id)
+	{
+		  boolean eliminada = servicio.eliminarCategoria(id);
+		    if (eliminada) 
+		    {
+		        return ResponseEntity.ok("Categoría eliminada correctamente");
+		    } 
+		    else 
+		    {
+		        return ResponseEntity.status(404).body("Categoría no encontrada");
+		    }
+	}
 	
 }
