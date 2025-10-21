@@ -1,8 +1,7 @@
 package com.proyecto_final.service;
 
-import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
-
 import com.proyecto_final.model.Producto;
 import com.proyecto_final.repository.ProductoRepository;
 
@@ -19,8 +18,15 @@ public class ProductoService {
     	productoRepository.save(producto);
     }
     
-    public void bajaProducto(Producto producto) {
-    	productoRepository.delete(producto);
+    public void bajaProducto(String sku) {
+    	Optional<Producto> producto = productoRepository.findBySku(sku);
+    	if(producto.isPresent()) {
+    		productoRepository.deleteById(sku);
+    	}
+    }
+    
+    public Optional<Producto> getBySku(String sku) {
+    	return productoRepository.findById(sku);
     }
 
 }

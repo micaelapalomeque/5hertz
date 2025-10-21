@@ -1,6 +1,10 @@
 package com.proyecto_final.controller;
 
 import java.util.Optional;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +42,21 @@ public class ProductoController {
 	        productoService.altaProducto(producto);
 	    } 
 	}
+	
+	@DeleteMapping
+	public void bajaProducto(@PathVariable String sku) {
+		productoService.bajaProducto(sku);
+	}
+	
+	@GetMapping("/{sku}")
+	public Producto consultarPorSku(@PathVariable String sku) {
+	    Optional<Producto> opt = productoService.getBySku(sku);
+	    if (opt.isPresent()) {
+	        return opt.get();
+	    } else {
+	        return null;
+	    }
+	}
 
 	
-
 }
