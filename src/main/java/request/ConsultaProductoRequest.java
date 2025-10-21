@@ -1,6 +1,6 @@
 package request;
 
-public class RequestConsultaProducto {
+public class ConsultaProductoRequest {
     private String sku;
 
     public String getSku() { return sku; }

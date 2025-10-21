@@ -1,6 +1,6 @@
 package request;
 
-public class RequestProducto {
+public class ProductoRequest {
     private String sku;
     private String nombreCategoria; 
     private String nombre;

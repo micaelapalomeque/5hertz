@@ -13,7 +13,7 @@ import com.proyecto_final.model.CategoriaProducto;
 import com.proyecto_final.model.Producto;
 import com.proyecto_final.service.CategoriaProductoService;
 import com.proyecto_final.service.ProductoService;
-import request.RequestProducto;
+import request.ProductoRequest;
 
 @RestController
 @RequestMapping("/productos")
@@ -28,7 +28,7 @@ public class ProductoController {
 	}
 	
 	@PostMapping
-	public void altaProducto(@RequestBody RequestProducto request) {
+	public void altaProducto(@RequestBody ProductoRequest request) {
 	    Optional<CategoriaProducto> opt = categoriaProductoService.findByNombre(request.getNombreCategoria());
 	    if (opt.isPresent()) {
 	        CategoriaProducto cat = opt.get();
