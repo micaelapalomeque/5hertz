@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity
+@Entity // Indica que esta clase es una entidad JPA y se mapeará a una tabla de la base de datos
 public class CategoriaProducto {
 
     @Id

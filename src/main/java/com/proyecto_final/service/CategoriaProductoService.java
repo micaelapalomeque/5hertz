@@ -1,5 +1,6 @@
 package com.proyecto_final.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.proyecto_final.repository.CategoriaProductoRepository;
@@ -30,6 +31,11 @@ public class CategoriaProductoService {
 	
 	public Optional<CategoriaProducto> findByNombre(String nombre) {
 		return repositorio.findByNombre(nombre);
+	}
+	
+	// Nuevo método para obtener todas las categorías
+	public List<CategoriaProducto> obtenerTodas() {
+		return repositorio.findAll();
 	}
 }
 
