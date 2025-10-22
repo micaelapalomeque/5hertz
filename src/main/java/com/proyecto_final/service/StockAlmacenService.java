@@ -4,12 +4,15 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.proyecto_final.model.StockAlmacen;
 import com.proyecto_final.repository.StockAlmacenRepository;
+import com.proyecto_final.service.MovimientoStockService;
 
 @Service
 public class StockAlmacenService {
+	private MovimientoStockService movimientoStockService;
 	private StockAlmacenRepository stockAlmacenRepository;
 	
-	public StockAlmacenService(StockAlmacenRepository stockAlmacenRepository) {
+	public StockAlmacenService(MovimientoStockService movimientoStockService, StockAlmacenRepository stockAlmacenRepository) {
+		this.movimientoStockService = movimientoStockService;
 		this.stockAlmacenRepository = stockAlmacenRepository;
 	}
 	
@@ -45,6 +48,7 @@ public class StockAlmacenService {
 			registro.setStockDisponible(registro.getStockDisponible() + cantidad);
 			registro.setStockTotal(registro.getStockTotal() + cantidad);
 			stockAlmacenRepository.save(registro);
+			movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "INGRESO");
 		}
 	}
 	
@@ -55,6 +59,7 @@ public class StockAlmacenService {
 				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
 				registro.setStockTotal(registro.getStockTotal() - cantidad);
 				stockAlmacenRepository.save(registro);
+				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "EGRESO");
 			}
 		}
 	}

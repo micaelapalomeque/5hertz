@@ -39,7 +39,7 @@ public class StockAlmacenController {
 		stockAlmacenService.reducirStock(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 	
-	@GetMapping("/consultar-stock/{idAlmacen}")
+	@GetMapping("/consultar/{idAlmacen}")
 	public Optional<StockAlmacen> consultarStockTotal(@PathVariable int idAlmacen) {
 		return stockAlmacenService.consultarStock(idAlmacen);
 	}
