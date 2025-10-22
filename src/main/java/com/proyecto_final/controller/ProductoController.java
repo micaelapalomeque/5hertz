@@ -1,5 +1,6 @@
 package com.proyecto_final.controller;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,5 +58,10 @@ public class ProductoController {
 	    }
 	}
 	
+	// Endpoint GET para obtener todos los productos
+	@GetMapping
+	public List<Producto> obtenerTodos() {
+		return productoService.obtenerTodos();
+	}
 	
 }

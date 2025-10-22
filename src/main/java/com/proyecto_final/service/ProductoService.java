@@ -1,5 +1,6 @@
 package com.proyecto_final.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.proyecto_final.model.Producto;
@@ -27,6 +28,11 @@ public class ProductoService {
     
     public Optional<Producto> getBySku(String sku) {
     	return productoRepository.findById(sku);
+    }
+    
+    // Método para obtener todos los productos
+    public List<Producto> obtenerTodos() {
+    	return productoRepository.findAll();
     }
 
 }
