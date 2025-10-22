@@ -48,7 +48,20 @@ public class StockAlmacenService {
 		}
 	}
 	
+	public void reducirStock(String sku, int idAlmacen, int cantidad) {
+		if(estaProductoHabilitado(sku, idAlmacen)) {
+			StockAlmacen registro = getStockAlmacen(sku, idAlmacen);
+			if(cantidad < registro.getStockTotal()) {
+				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
+				registro.setStockTotal(registro.getStockTotal() - cantidad);
+				stockAlmacenRepository.save(registro);
+			}
+		}
+	}
 	
+	public Optional<StockAlmacen> consultarStock(int idAlmacen) {
+		return stockAlmacenRepository.findByIdAlmacen(idAlmacen);
+	}
 	
 	
 }
