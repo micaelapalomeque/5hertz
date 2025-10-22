@@ -1,7 +1,6 @@
 package com.proyecto_final.controller;
 
 import java.util.Optional;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,7 +42,7 @@ public class ProductoController {
 	    } 
 	}
 	
-	@DeleteMapping
+	@DeleteMapping("/{sku}")
 	public void bajaProducto(@PathVariable String sku) {
 		productoService.bajaProducto(sku);
 	}
@@ -57,6 +56,6 @@ public class ProductoController {
 	        return null;
 	    }
 	}
-
+	
 	
 }
