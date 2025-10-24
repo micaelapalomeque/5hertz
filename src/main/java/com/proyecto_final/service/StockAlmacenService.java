@@ -42,6 +42,7 @@ public class StockAlmacenService {
         }
     }
 	
+	///////////////REVISAR////////////////////////////////////////////////////////////////
 	public void incrementarStock(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			StockAlmacen registro = getStockProducto(sku, idAlmacen);
@@ -52,7 +53,7 @@ public class StockAlmacenService {
 		}
 	}
 	
-	public void reducirStock(String sku, int idAlmacen, int cantidad) {
+	public void reducirStockTotal(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			StockAlmacen registro = getStockProducto(sku, idAlmacen);
 			if(cantidad < registro.getStockTotal()) {
@@ -64,6 +65,14 @@ public class StockAlmacenService {
 		}
 	}
 	
+	public void reducirStockReservado(String sku, int idAlmacen, int cantidad) {
+    
+	}
+
+    public void consumirMaterial(String sku, int idAlmacen, int cantidad) {
+    	
+    }
+	
 	public Optional<StockAlmacen> consultarStock(int idAlmacen) {
 		return stockAlmacenRepository.findByIdAlmacen(idAlmacen);
 	}
@@ -72,9 +81,16 @@ public class StockAlmacenService {
 		
 	}
 	
-	public void liberarStock(int idAlmacen, String sku, int cantidad) {
+	public void ingresoManual() {
 	
 	}
+	
+	public void egresoManual() {
+		
+	}
+	
+	///////////////REVISAR////////////////////////////////////////////////////////////////
+
 	
 	
 	

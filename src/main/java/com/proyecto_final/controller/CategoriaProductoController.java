@@ -35,7 +35,6 @@ public class CategoriaProductoController {
 		  servicio.eliminarCategoria(request.getNombre());
 	}
 	
-	// Nuevo endpoint GET para obtener todas las categorías
 	@GetMapping
 	public List<CategoriaProducto> obtenerTodas() {
 		return servicio.obtenerTodas();

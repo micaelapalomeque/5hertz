@@ -25,5 +25,10 @@ public class CategoriaProducto {
 
     @Column(name = "descripcion")
     private String descripcion;
+    
+    public CategoriaProducto(String nombre, String descripcion) {
+    	this.nombre = nombre;
+    	this.descripcion = descripcion;
+    }
 	
 }

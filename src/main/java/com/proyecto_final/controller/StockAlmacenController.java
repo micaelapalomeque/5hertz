@@ -36,7 +36,7 @@ public class StockAlmacenController {
 	
 	@PutMapping("/reducir")
 	public void reducirStock(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.reducirStock(request.getSku(), request.getIdAlmacen(), request.getCantidad());
+		stockAlmacenService.reducirStockTotal(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 	
 	@GetMapping("/consultar/{idAlmacen}")
