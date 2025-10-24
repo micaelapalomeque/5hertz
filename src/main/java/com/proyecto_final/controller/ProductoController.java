@@ -59,9 +59,9 @@ public class ProductoController {
 	}
 	
 	// Endpoint GET para obtener todos los productos
-	@GetMapping
-	public List<Producto> obtenerTodos() {
-		return productoService.obtenerTodos();
-	}
+	//@GetMapping
+	//public List<Producto> obtenerTodos() {
+	//	return productoService.obtenerTodos();
+	//}
 	
 }

@@ -1,7 +1,13 @@
 package com.proyecto_final.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "stock_almacen")
 public class StockAlmacen {
@@ -29,10 +35,7 @@ public class StockAlmacen {
     @Column(name = "stock_total")
     private int stockTotal = 0;
 
-    public StockAlmacen() {}
-
-    public StockAlmacen(int idAlmacen, String sku, int cantidadMinima, int stockReservado,
-                        int stockDisponible, int stockTotal) {
+    public StockAlmacen(int idAlmacen, String sku, int cantidadMinima, int stockReservado, int stockDisponible, int stockTotal) {
         this.idAlmacen = idAlmacen;
         this.sku = sku;
         this.cantidadMinima = cantidadMinima;
@@ -41,24 +44,4 @@ public class StockAlmacen {
         this.stockTotal = stockTotal;
     }
 
-    public int getIdStock() { return idStock; }
-    public void setIdStock(int idStock) { this.idStock = idStock; }
-
-    public int getIdAlmacen() { return idAlmacen; }
-    public void setIdAlmacen(int idAlmacen) { this.idAlmacen = idAlmacen; }
-
-    public String getSku() { return sku; }
-    public void setSku(String sku) { this.sku = sku; }
-
-    public int getCantidadMinima() { return cantidadMinima; }
-    public void setCantidadMinima(int cantidadMinima) { this.cantidadMinima = cantidadMinima; }
-
-    public int getStockReservado() { return stockReservado; }
-    public void setStockReservado(int stockReservado) { this.stockReservado = stockReservado; }
-
-    public int getStockDisponible() { return stockDisponible; }
-    public void setStockDisponible(int stockDisponible) { this.stockDisponible = stockDisponible; }
-
-    public int getStockTotal() { return stockTotal; }
-    public void setStockTotal(int stockTotal) { this.stockTotal = stockTotal; }
 }

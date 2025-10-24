@@ -5,8 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity // Indica que esta clase es una entidad JPA y se mapeará a una tabla de la base de datos
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
 public class CategoriaProducto {
 
     @Id
@@ -19,22 +25,5 @@ public class CategoriaProducto {
 
     @Column(name = "descripcion")
     private String descripcion;
-
-    public CategoriaProducto() {  // 👈 Constructor vacío obligatorio
-    }
-
-    public CategoriaProducto(String nombre, String descripcion) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-    }
-    public int getId() {
-    	return this.idCategoria;
-    }
-    public int getIdCategoria() {
-    	return this.idCategoria;
-    }
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+	
 }

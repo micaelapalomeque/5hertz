@@ -68,5 +68,15 @@ public class StockAlmacenService {
 		return stockAlmacenRepository.findByIdAlmacen(idAlmacen);
 	}
 	
+	public void reservarStock(int idAlmacen, String sku, int cantidad) {
+		
+	}
+	
+	public void liberarStock(int idAlmacen, String sku, int cantidad) {
+	
+	}
+	
+	
+	
 	
 }
