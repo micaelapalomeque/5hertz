@@ -8,12 +8,9 @@ import com.proyecto_final.model.StockAlmacen;
 @Repository
 public interface StockAlmacenRepository extends JpaRepository<StockAlmacen, Integer> {
 
-    // Buscar un registro por el SKU del producto
     Optional<StockAlmacen> findBySku(String sku);
 
-    // Buscar por ID del almacén
     Optional<StockAlmacen> findByIdAlmacen(int idAlmacen);
 
-    // Si quisieras buscar por ambos (por ejemplo, para un producto en un almacén específico)
     Optional<StockAlmacen> findBySkuAndIdAlmacen(String sku, int idAlmacen);
 }

@@ -20,7 +20,7 @@ public class StockAlmacenService {
 		return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).isPresent();
 	}
 	
-	private StockAlmacen getStockAlmacen(String sku, int idAlmacen) {
+	private StockAlmacen getStockProducto(String sku, int idAlmacen) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).get();
 		}
@@ -44,7 +44,7 @@ public class StockAlmacenService {
 	
 	public void incrementarStock(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = getStockAlmacen(sku, idAlmacen);
+			StockAlmacen registro = getStockProducto(sku, idAlmacen);
 			registro.setStockDisponible(registro.getStockDisponible() + cantidad);
 			registro.setStockTotal(registro.getStockTotal() + cantidad);
 			stockAlmacenRepository.save(registro);
@@ -54,7 +54,7 @@ public class StockAlmacenService {
 	
 	public void reducirStock(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = getStockAlmacen(sku, idAlmacen);
+			StockAlmacen registro = getStockProducto(sku, idAlmacen);
 			if(cantidad < registro.getStockTotal()) {
 				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
 				registro.setStockTotal(registro.getStockTotal() - cantidad);

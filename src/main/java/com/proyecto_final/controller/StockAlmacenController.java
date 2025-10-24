@@ -40,7 +40,7 @@ public class StockAlmacenController {
 	}
 	
 	@GetMapping("/consultar/{idAlmacen}")
-	public Optional<StockAlmacen> consultarStockTotal(@PathVariable int idAlmacen) {
+	public Optional<StockAlmacen> consultarStock(@PathVariable int idAlmacen) {
 		return stockAlmacenService.consultarStock(idAlmacen);
 	}
 	
