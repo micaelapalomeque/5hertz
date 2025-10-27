@@ -32,7 +32,7 @@ public class StockAlmacenController {
 	
 	@PutMapping("/incrementar")
 	public void incrementarStock(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.incrementarStock(request.getSku(), request.getIdAlmacen(), request.getCantidad());
+		stockAlmacenService.incrementarStockTotal(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 	
 	@PutMapping("/reducir")
@@ -40,10 +40,10 @@ public class StockAlmacenController {
 		stockAlmacenService.reducirStockTotal(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 	
-	@GetMapping("/consultar/{idAlmacen}")
-	public Optional<StockAlmacen> consultarStock(@PathVariable int idAlmacen) {
-		return stockAlmacenService.consultarStock(idAlmacen);
-	}
+	//@GetMapping("/consultar/{idAlmacen}")
+	//public Optional<StockAlmacen> consultarStock(@PathVariable int idAlmacen) {
+	//	return stockAlmacenService.consultarStockTotal(idAlmacen);
+	//}
 	
 	
 }

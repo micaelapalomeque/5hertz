@@ -20,7 +20,7 @@ public class StockAlmacenService {
 		return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).isPresent();
 	}
 	
-	private StockAlmacen getStockProducto(String sku, int idAlmacen) {
+	private StockAlmacen consultarStockProducto(String sku, int idAlmacen) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).get();
 		}
@@ -42,10 +42,9 @@ public class StockAlmacenService {
         }
     }
 	
-	///////////////REVISAR////////////////////////////////////////////////////////////////
-	public void incrementarStock(String sku, int idAlmacen, int cantidad) {
+	public void incrementarStockTotal(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = getStockProducto(sku, idAlmacen);
+			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
 			registro.setStockDisponible(registro.getStockDisponible() + cantidad);
 			registro.setStockTotal(registro.getStockTotal() + cantidad);
 			stockAlmacenRepository.save(registro);
@@ -55,44 +54,56 @@ public class StockAlmacenService {
 	
 	public void reducirStockTotal(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = getStockProducto(sku, idAlmacen);
-			if(cantidad < registro.getStockTotal()) {
-				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
+			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+			if(cantidad <= registro.getStockTotal()) {
 				registro.setStockTotal(registro.getStockTotal() - cantidad);
+				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
 				stockAlmacenRepository.save(registro);
 				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "EGRESO");
 			}
 		}
 	}
 	
-	public void reducirStockReservado(String sku, int idAlmacen, int cantidad) {
-    
+	public void reservarMaterial(String sku, int idAlmacen, int cantidad) {
+		if(estaProductoHabilitado(sku, idAlmacen)) {
+			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+			if(cantidad <= registro.getStockDisponible()) {
+				registro.setStockReservado(registro.getStockReservado() + cantidad);
+				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
+				stockAlmacenRepository.save(registro);
+				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "RESERVA");
+			}
+		}
 	}
-
+	
+	public void liberarMaterial(String sku, int idAlmacen, int cantidad) {
+		if(estaProductoHabilitado(sku, idAlmacen)) {
+			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+			if(cantidad <= registro.getStockReservado()) {
+				registro.setStockReservado(registro.getStockReservado() - cantidad);
+				registro.setStockDisponible(registro.getStockDisponible() + cantidad);
+				stockAlmacenRepository.save(registro);
+				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "LIBERACION");
+			}
+		}
+	}
+	
     public void consumirMaterial(String sku, int idAlmacen, int cantidad) {
-    	
+    	if(estaProductoHabilitado(sku, idAlmacen)) {
+    		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+    		if(cantidad <= registro.getStockReservado()) {
+    			registro.setStockTotal(registro.getStockTotal() - cantidad);
+    			registro.setStockDisponible(registro.getStockDisponible() - cantidad);
+    			registro.setStockReservado(registro.getStockReservado() - cantidad);
+    			stockAlmacenRepository.save(registro);
+				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "CONSUMO");
+    		}
+    	}
     }
 	
-	public Optional<StockAlmacen> consultarStock(int idAlmacen) {
-		return stockAlmacenRepository.findByIdAlmacen(idAlmacen);
-	}
-	
-	public void reservarStock(int idAlmacen, String sku, int cantidad) {
-		
-	}
-	
-	public void ingresoManual() {
-	
-	}
-	
-	public void egresoManual() {
-		
-	}
-	
-	///////////////REVISAR////////////////////////////////////////////////////////////////
+    public boolean hayStockDisponible(String sku, int idAlmacen, int cantidad) {
+    	return consultarStockProducto(sku, idAlmacen).getStockDisponible() >= cantidad;
+    }
 
-	
-	
-	
 	
 }
