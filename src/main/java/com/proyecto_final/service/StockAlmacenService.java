@@ -1,5 +1,6 @@
 package com.proyecto_final.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.proyecto_final.model.StockAlmacen;
@@ -20,11 +21,15 @@ public class StockAlmacenService {
 		return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).isPresent();
 	}
 	
-	private StockAlmacen consultarStockProducto(String sku, int idAlmacen) {
+	public StockAlmacen consultarStockProducto(String sku, int idAlmacen) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).get();
 		}
 		return null;
+	}
+	
+	public List<StockAlmacen> consultarStockAlmacen(int idAlmacen) {
+		return stockAlmacenRepository.findByIdAlmacen(idAlmacen);
 	}
 	
 	public void habilitarProducto(int idAlmacen, String sku) {

@@ -1,5 +1,6 @@
 package com.proyecto_final.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,7 @@ public interface StockAlmacenRepository extends JpaRepository<StockAlmacen, Inte
 
     Optional<StockAlmacen> findBySku(String sku);
 
-    Optional<StockAlmacen> findByIdAlmacen(int idAlmacen);
+    List<StockAlmacen> findByIdAlmacen(int idAlmacen);
 
     Optional<StockAlmacen> findBySkuAndIdAlmacen(String sku, int idAlmacen);
 }

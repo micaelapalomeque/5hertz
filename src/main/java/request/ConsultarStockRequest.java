@@ -9,7 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConsultaProductoRequest {
+public class ConsultarStockRequest {
     private String sku;
+    private int idAlmacen;
 
 }
+

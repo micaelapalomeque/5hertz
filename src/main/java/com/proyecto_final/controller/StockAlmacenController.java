@@ -1,5 +1,6 @@
 package com.proyecto_final.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.proyecto_final.service.StockAlmacenService;
+
+import request.ConsultarStockRequest;
 import request.HabilitarProductoRequest;
 import request.ModificarStockRequest;
 import com.proyecto_final.model.StockAlmacen;
@@ -24,7 +27,6 @@ public class StockAlmacenController {
 		this.stockAlmacenService = stockAlmacenService;
 	}
 	
-	//Corregir db - agregar FLAG
 	@PutMapping("/habilitar-producto")
 	public void habilitarProducto(@RequestBody HabilitarProductoRequest request) {
 		stockAlmacenService.habilitarProducto(request.getIdAlmacen(), request.getSku());
@@ -40,10 +42,15 @@ public class StockAlmacenController {
 		stockAlmacenService.reducirStockTotal(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 	
-	//@GetMapping("/consultar/{idAlmacen}")
-	//public Optional<StockAlmacen> consultarStock(@PathVariable int idAlmacen) {
-	//	return stockAlmacenService.consultarStockTotal(idAlmacen);
-	//}
+	@GetMapping("/consultar-almacen")
+	public List<StockAlmacen> consultarStockAlmacen(@PathVariable int idStock) {
+		return stockAlmacenService.consultarStockAlmacen(idStock);
+	}
+	
+	@GetMapping("/consultar-producto-almacen")
+	public StockAlmacen consultarStockProducto(@RequestBody ConsultarStockRequest request){
+		return stockAlmacenService.consultarStockProducto(request.getSku(), request.getIdAlmacen());
+	}
 	
 	
 }
