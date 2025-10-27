@@ -29,7 +29,7 @@ public class OrdenProduccionService {
 		cambioOpService.registrarCambio(op.getIdOp(), "planificada", responsable);
 	}
 	
-	private Optional<OrdenProduccion> getById(int idOp) {
+	public Optional<OrdenProduccion> consultarOp(int idOp) {
 		return ordenProduccionRepository.findById(idOp);
 	}
 	
@@ -44,7 +44,7 @@ public class OrdenProduccionService {
 	}
 
 	public boolean activarOp(int idOp, String responsable) {
-	    Optional<OrdenProduccion> opt = getById(idOp);
+	    Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
 	    if (opt.isEmpty()) return false;
 
@@ -71,7 +71,7 @@ public class OrdenProduccionService {
 	}
 
 	public boolean consumirOp(int idOp, String responsable) {
-		Optional<OrdenProduccion> opt = getById(idOp);
+		Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
 	    if (opt.isEmpty()) return false;
 
@@ -95,7 +95,7 @@ public class OrdenProduccionService {
 	}
 	
 	public boolean cancelarOp(int idOp, String responsable) {
-		Optional<OrdenProduccion> opt = getById(idOp);
+		Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
 	    if (opt.isEmpty()) return false;
 
