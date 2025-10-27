@@ -48,7 +48,7 @@ public class OrdenProduccionController {
 		ordenProduccionService.cancelarOp(request.getIdOp(), request.getResponsable());
 	}
 	
-	@PutMapping("/inactiva")
+	@PutMapping("/inactivar")
 	public void inactivarOp(@RequestBody CambiarEstadoOpRequest request) {
 		ordenProduccionService.inactivarOp(request.getIdOp(), request.getResponsable());
 	}

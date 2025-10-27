@@ -133,5 +133,6 @@ public class OrdenProduccionService {
     	ordenProduccionRepository.save(op);
     	cambioOpService.registrarCambio(idOp, "inactiva", responsable);
 	}
+	
 
 }
