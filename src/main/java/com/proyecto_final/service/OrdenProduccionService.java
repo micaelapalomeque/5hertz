@@ -43,15 +43,15 @@ public class OrdenProduccionService {
 		return true;
 	}
 
-	public boolean activarOp(int idOp, String responsable) {
+	public void activarOp(int idOp, String responsable) {
 	    Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
-	    if (opt.isEmpty()) return false;
+	    if (opt.isEmpty()) return;
 
 	    OrdenProduccion op = opt.get();
 	    
 	    if (!op.getEstado().equals("planificada") || !hayStockParaFabricar(op.getIdAlmacen(), op.getSku(), op.getCantidad())) {
-	        return false;
+	        return;
 	    }
 	    
 	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
@@ -66,19 +66,17 @@ public class OrdenProduccionService {
 	    op.setEstado("activa");
 	    ordenProduccionRepository.save(op);
 	    cambioOpService.registrarCambio(idOp, "activa", responsable);
-	    
-	    return true;
 	}
 
-	public boolean consumirOp(int idOp, String responsable) {
+	public void consumirOp(int idOp, String responsable) {
 		Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
-	    if (opt.isEmpty()) return false;
+	    if (opt.isEmpty()) return;
 
 	    OrdenProduccion op = opt.get();
 	    
 	    if(!op.getEstado().equals("activa")) {
-	    	return false;
+	    	return;
 	    }
 	    
 	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
@@ -90,19 +88,17 @@ public class OrdenProduccionService {
 	    op.setEstado("consumida");
     	ordenProduccionRepository.save(op);
     	cambioOpService.registrarCambio(idOp, "consumida", responsable);
-    	
-    	return true;
 	}
 	
-	public boolean cancelarOp(int idOp, String responsable) {
+	public void cancelarOp(int idOp, String responsable) {
 		Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
-	    if (opt.isEmpty()) return false;
+	    if (opt.isEmpty()) return;
 
 	    OrdenProduccion op = opt.get();
 	    
 	    if(!op.getEstado().equals("activa") || op.getEstado().equals("planificada")) {
-	    	return false;
+	    	return;
 	    }
 	    
 	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
@@ -114,8 +110,28 @@ public class OrdenProduccionService {
 	    op.setEstado("cancelada");
     	ordenProduccionRepository.save(op);
     	cambioOpService.registrarCambio(idOp, "cancelada", responsable);
-    	
-    	return true;
+	}
+	
+	public void inactivarOp(int idOp, String responsable) {
+		Optional<OrdenProduccion> opt = consultarOp(idOp);
+	    
+	    if (opt.isEmpty()) return;
+
+	    OrdenProduccion op = opt.get();
+	    
+	    if(!op.getEstado().equals("activa")) {
+	    	return;
+	    }
+	    
+	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
+	    
+	    for(Bom bom : listaMateriales) {
+	    	stockAlmacenService.liberarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), bom.getCanPorUnidad() * op.getCantidad());
+	    }
+	    
+	    op.setEstado("inactiva");
+    	ordenProduccionRepository.save(op);
+    	cambioOpService.registrarCambio(idOp, "inactiva", responsable);
 	}
 
 }
