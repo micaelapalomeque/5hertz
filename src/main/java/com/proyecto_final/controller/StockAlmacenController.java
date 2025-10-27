@@ -24,7 +24,8 @@ public class StockAlmacenController {
 		this.stockAlmacenService = stockAlmacenService;
 	}
 	
-	@PostMapping("/habilitar-producto")
+	//Corregir db - agregar FLAG
+	@PutMapping("/habilitar-producto")
 	public void habilitarProducto(@RequestBody HabilitarProductoRequest request) {
 		stockAlmacenService.habilitarProducto(request.getIdAlmacen(), request.getSku());
 	}

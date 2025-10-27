@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.proyecto_final.model.CategoriaProducto;
 import com.proyecto_final.service.CategoriaProductoService;
 import request.AgregarCategoriaRequest;
-import request.EliminarCategoriaRequest;
 
 @RestController
 @RequestMapping("/categorias")
@@ -29,10 +28,10 @@ public class CategoriaProductoController {
 		servicio.agregarCategoria(objeto.getNombre(), objeto.getDescripcion());
 	}
 	
-	@DeleteMapping
-	public void eliminarCategoria(@RequestBody EliminarCategoriaRequest request)
+	@DeleteMapping("/{nombre}")
+	public void eliminarCategoria(@PathVariable String nombre)
 	{
-		  servicio.eliminarCategoria(request.getNombre());
+		  servicio.eliminarCategoria(nombre);
 	}
 	
 	@GetMapping

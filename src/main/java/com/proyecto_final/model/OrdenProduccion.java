@@ -2,6 +2,7 @@ package com.proyecto_final.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @Entity
 public class OrdenProduccion {
 
+	@Id
 	@Column(name = "id_op")
 	private int idOp;
 	

@@ -30,7 +30,6 @@ public class ProductoService {
     	return productoRepository.findById(sku);
     }
     
-    // Método para obtener todos los productos
     public List<Producto> obtenerTodos() {
     	return productoRepository.findAll();
     }
