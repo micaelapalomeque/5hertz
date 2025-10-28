@@ -2,13 +2,13 @@ package com.proyecto_final.controller;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.proyecto_final.service.StockAlmacenService;
 
@@ -48,9 +48,12 @@ public class StockAlmacenController {
 	}
 	
 	@GetMapping("/consultar-producto-almacen")
-	public StockAlmacen consultarStockProducto(@RequestBody ConsultarStockRequest request){
-		return stockAlmacenService.consultarStockProducto(request.getSku(), request.getIdAlmacen());
+	public StockAlmacen consultarStockProducto(
+	        @RequestParam String sku,
+	        @RequestParam int idAlmacen) {
+	    return stockAlmacenService.consultarStockProducto(sku, idAlmacen);
 	}
+
 	
 	
 }

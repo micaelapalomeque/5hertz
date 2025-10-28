@@ -28,7 +28,7 @@ public class OrdenProduccionController {
 		ordenProduccionService.crearOp(op.getIdAlmacen(), op.getSku(), op.getCantidad(), op.getResponsable());
 	}
 	
-	@GetMapping("/consultar")
+	@GetMapping("/consultar/{idOp}")
 	public Optional<OrdenProduccion> consultarOp(@PathVariable int idOp) {
 		return ordenProduccionService.consultarOp(idOp);
 	}
