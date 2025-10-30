@@ -54,6 +54,8 @@ public class StockAlmacenController {
 	    return stockAlmacenService.consultarStockProducto(sku, idAlmacen);
 	}
 
-	
-	
+	@GetMapping("/todos")
+	public List<StockAlmacen> obtenerTodosLosStocks() {
+		return stockAlmacenService.obtenerTodosLosStocks();
+	}
 }

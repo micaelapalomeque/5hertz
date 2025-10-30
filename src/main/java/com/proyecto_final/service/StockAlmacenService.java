@@ -110,5 +110,7 @@ public class StockAlmacenService {
     	return consultarStockProducto(sku, idAlmacen).getStockDisponible() >= cantidad;
     }
 
-	
+    public List<StockAlmacen> obtenerTodosLosStocks() {
+    	return stockAlmacenRepository.findAll();
+    }
 }
