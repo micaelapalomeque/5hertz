@@ -13,20 +13,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Bom {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_bom")
-	private int idBom;
-	
-	@Column(name = "sku_producto_final")
-	private String skuProductoFinal;
-	
-	@Column(name = "sku_material")
-	private String skuMaterial;
-	
-	@Column(name = "cant_por_unidad")
-	private int canPorUnidad;
+public class CentroProduccion {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_centro")
+    private int idCentro;
+
+    @Column(name = "sucursal")
+    private String sucursal;
+
+    @Column(name = "descripcion")
+    private String descripcion;
 }
