@@ -115,4 +115,12 @@ public class StockAlmacenService {
     public List<StockAlmacen> obtenerTodosLosStocks() {
     	return stockAlmacenRepository.findAll();
     }
+
+    public void actualizarCantidadMinima(String sku, int idAlmacen, int cantidadMinima) {
+    	if(estaProductoHabilitado(sku, idAlmacen)) {
+    		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+    		registro.setCantidadMinima(cantidadMinima);
+    		stockAlmacenRepository.save(registro);
+    	}
+    }
 }

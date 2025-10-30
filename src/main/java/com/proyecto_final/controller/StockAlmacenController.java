@@ -58,4 +58,9 @@ public class StockAlmacenController {
 	public List<StockAlmacen> obtenerTodosLosStocks() {
 		return stockAlmacenService.obtenerTodosLosStocks();
 	}
+
+	@PutMapping("/actualizar-minimo")
+	public void actualizarCantidadMinima(@RequestBody ModificarStockRequest request) {
+		stockAlmacenService.actualizarCantidadMinima(request.getSku(), request.getIdAlmacen(), request.getCantidad());
+	}
 }
