@@ -23,6 +23,9 @@ public class StockAlmacen {
     @Column(name = "sku", unique = true)
     private String sku;
 
+    @Column(name = "cantidad")
+    private int cantidad = 0;
+
     @Column(name = "cantidad_minima")
     private int cantidadMinima = 0;
 
@@ -35,9 +38,10 @@ public class StockAlmacen {
     @Column(name = "stock_total")
     private int stockTotal = 0;
 
-    public StockAlmacen(int idAlmacen, String sku, int cantidadMinima, int stockReservado, int stockDisponible, int stockTotal) {
+    public StockAlmacen(int idAlmacen, String sku, int cantidad, int cantidadMinima, int stockReservado, int stockDisponible, int stockTotal) {
         this.idAlmacen = idAlmacen;
         this.sku = sku;
+        this.cantidad = cantidad;
         this.cantidadMinima = cantidadMinima;
         this.stockReservado = stockReservado;
         this.stockDisponible = stockDisponible;

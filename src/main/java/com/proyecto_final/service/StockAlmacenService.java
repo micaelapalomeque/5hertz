@@ -39,6 +39,7 @@ public class StockAlmacenService {
         	 StockAlmacen nuevoStock = new StockAlmacen();
              nuevoStock.setIdAlmacen(idAlmacen);
              nuevoStock.setSku(sku);
+             nuevoStock.setCantidad(0);
              nuevoStock.setCantidadMinima(0);
              nuevoStock.setStockReservado(0);
              nuevoStock.setStockDisponible(0);
@@ -50,6 +51,7 @@ public class StockAlmacenService {
 	public void incrementarStockTotal(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+			registro.setCantidad(registro.getCantidad() + cantidad);
 			registro.setStockDisponible(registro.getStockDisponible() + cantidad);
 			registro.setStockTotal(registro.getStockTotal() + cantidad);
 			stockAlmacenRepository.save(registro);
@@ -110,5 +112,15 @@ public class StockAlmacenService {
     	return consultarStockProducto(sku, idAlmacen).getStockDisponible() >= cantidad;
     }
 
-	
+    public List<StockAlmacen> obtenerTodosLosStocks() {
+    	return stockAlmacenRepository.findAll();
+    }
+
+    public void actualizarCantidadMinima(String sku, int idAlmacen, int cantidadMinima) {
+    	if(estaProductoHabilitado(sku, idAlmacen)) {
+    		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+    		registro.setCantidadMinima(cantidadMinima);
+    		stockAlmacenRepository.save(registro);
+    	}
+    }
 }

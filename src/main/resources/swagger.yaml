@@ -1,0 +1,568 @@
+openapi: 3.0.3
+info:
+  title: 5Hertz
+  version: 1.0.4
+  description: >
+    Documentacion de la API productiva del sistema de produccion desarrollado por 5Hertz orientado a PYMES alimenticias.
+servers:
+  - url: http://localhost:8080
+    description: Servidor local de desarrollo
+
+tags:
+  - name: CategoriaProducto
+    description: Endpoints para gestionar categorias de productos.
+  - name: Producto
+    description: Endpoints para gestionar productos.
+  - name: StockAlmacen
+    description: Endpoints para la gestion del stock en los almacenes.
+  - name: MovimientoStock
+    description: Endpoints para registrar y consultar movimientos de stock.
+  - name: OrdenProduccion
+    description: Endpoints para gestionar ordenes de produccion.
+  - name: CambioOp
+    description: Endpoints para consultar los cambios de estado de las ordenes.
+
+paths:
+  /categorias:
+    get:
+      summary: Obtener todas las categorias
+      tags: [CategoriaProducto]
+      responses:
+        '200':
+          description: Lista de categorias obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoriaProducto'
+    post:
+      summary: Agregar una nueva categoria
+      tags: [CategoriaProducto]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgregarCategoriaRequest'
+      responses:
+        '201':
+          description: Categoria creada exitosamente.
+        '400':
+          description: Datos invalidos o incompletos.
+
+  /categorias/{nombre}:
+    delete:
+      summary: Eliminar una categoria
+      tags: [CategoriaProducto]
+      parameters:
+        - name: nombre
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Categoria eliminada correctamente.
+        '404':
+          description: No se encontro la categoria indicada.
+
+  /productos:
+    post:
+      summary: Alta de producto
+      tags: [Producto]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoRequest'
+      responses:
+        '201':
+          description: Producto creado exitosamente.
+        '400':
+          description: Datos invalidos o la categoria no existe.
+
+  /productos/{sku}:
+    get:
+      summary: Consultar producto por SKU
+      tags: [Producto]
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+        '404':
+          description: Producto no encontrado.
+    delete:
+      summary: Baja de producto
+      tags: [Producto]
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto eliminado correctamente.
+        '404':
+          description: No se encontro el producto indicado.
+
+  /productos/todos:
+    get:
+      summary: Obtener todos los productos
+      tags: [Producto]
+      responses:
+        '200':
+          description: Lista de productos obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Producto'
+
+  /stock/habilitar-producto:
+    put:
+      summary: Habilitar producto en almacen
+      tags: [StockAlmacen]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HabilitarProductoRequest'
+      responses:
+        '200':
+          description: Producto habilitado correctamente.
+
+  /stock/incrementar:
+    put:
+      summary: Incrementar stock total
+      tags: [StockAlmacen]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModificarStockRequest'
+      responses:
+        '200':
+          description: Stock incrementado correctamente.
+
+  /stock/reducir:
+    put:
+      summary: Reducir stock total
+      tags: [StockAlmacen]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModificarStockRequest'
+      responses:
+        '200':
+          description: Stock reducido correctamente.
+
+  /stock/consultar-almacen/{idStock}:
+    get:
+      summary: Consultar stock de un almacen
+      tags: [StockAlmacen]
+      parameters:
+        - name: idStock
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de productos en el almacen.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StockAlmacen'
+
+  /stock/consultar-producto-almacen:
+    get:
+      summary: Consultar stock de un producto en un almacen
+      tags: [StockAlmacen]
+      parameters:
+        - name: sku
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: idAlmacen
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Stock obtenido correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockAlmacen'
+        '404':
+          description: Producto o almacen no encontrado.
+
+  /movimientos-stock:
+    post:
+      summary: Registrar movimiento de stock
+      tags: [MovimientoStock]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrarMovimientoRequest'
+      responses:
+        '201':
+          description: Movimiento registrado exitosamente.
+    get:
+      summary: Consultar todos los movimientos
+      tags: [MovimientoStock]
+      responses:
+        '200':
+          description: Lista de movimientos obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovimientoStock'
+
+  /movimientos-stock/sku/{sku}:
+    get:
+      summary: Consultar movimientos por SKU
+      tags: [MovimientoStock]
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Movimientos del producto obtenidos correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovimientoStock'
+
+  /movimientos-stock/egresos:
+    get:
+      summary: Consultar egresos de stock
+      tags: [MovimientoStock]
+      responses:
+        '200':
+          description: Lista de egresos obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovimientoStock'
+
+  /movimientos-stock/ingresos:
+    get:
+      summary: Consultar ingresos de stock
+      tags: [MovimientoStock]
+      responses:
+        '200':
+          description: Lista de ingresos obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovimientoStock'
+
+  /ordenes-produccion/crear:
+    post:
+      summary: Crear una nueva orden de produccion
+      tags: [OrdenProduccion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrdenProduccion'
+      responses:
+        '201':
+          description: Orden de produccion creada correctamente.
+
+  /ordenes-produccion/consultar/{idOp}:
+    get:
+      summary: Consultar una orden de produccion
+      tags: [OrdenProduccion]
+      parameters:
+        - name: idOp
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Orden obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdenProduccion'
+
+  /ordenes-produccion/activar:
+    put:
+      summary: Activar orden de produccion
+      tags: [OrdenProduccion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarEstadoOpRequest'
+      responses:
+        '200':
+          description: Orden activada correctamente.
+
+  /ordenes-produccion/consumir:
+    put:
+      summary: Consumir orden de produccion
+      tags: [OrdenProduccion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarEstadoOpRequest'
+      responses:
+        '200':
+          description: Orden consumida correctamente.
+
+  /ordenes-produccion/cancelar:
+    put:
+      summary: Cancelar orden de produccion
+      tags: [OrdenProduccion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarEstadoOpRequest'
+      responses:
+        '200':
+          description: Orden cancelada correctamente.
+
+  /ordenes-produccion/inactivar:
+    put:
+      summary: Inactivar orden de produccion
+      tags: [OrdenProduccion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarEstadoOpRequest'
+      responses:
+        '200':
+          description: Orden inactivada correctamente.
+
+  /cambio-op:
+    get:
+      summary: Consultar todos los cambios de ordenes
+      tags: [CambioOp]
+      responses:
+        '200':
+          description: Lista de cambios obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CambioOp'
+
+  /cambio-op/{idOp}:
+    get:
+      summary: Consultar historial de una orden
+      tags: [CambioOp]
+      parameters:
+        - name: idOp
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de cambios obtenida correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CambioOp'
+
+components:
+  schemas:
+    AgregarCategoriaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+
+    CategoriaProducto:
+      type: object
+      properties:
+        idCategoria:
+          type: integer
+        nombre:
+          type: string
+        descripcion:
+          type: string
+
+    ProductoRequest:
+      type: object
+      properties:
+        sku:
+          type: string
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        unidadMedida:
+          type: string
+        nombreCategoria:
+          type: string
+
+    Producto:
+      type: object
+      properties:
+        sku:
+          type: string
+        idCategoria:
+          type: integer
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        unidadMedida:
+          type: string
+
+    HabilitarProductoRequest:
+      type: object
+      properties:
+        idAlmacen:
+          type: integer
+        sku:
+          type: string
+
+    ModificarStockRequest:
+      type: object
+      properties:
+        idAlmacen:
+          type: integer
+        sku:
+          type: string
+        cantidad:
+          type: number
+
+    StockAlmacen:
+      type: object
+      properties:
+        idStock:
+          type: integer
+        idAlmacen:
+          type: integer
+        sku:
+          type: string
+        cantidadMinima:
+          type: number
+        stockReservado:
+          type: number
+        stockDisponible:
+          type: number
+        stockTotal:
+          type: number
+
+    RegistrarMovimientoRequest:
+      type: object
+      properties:
+        idAlmacen:
+          type: integer
+        sku:
+          type: string
+        cantidad:
+          type: number
+        tipoMovimiento:
+          type: string
+          enum: [ingreso, egreso]
+
+    MovimientoStock:
+      type: object
+      properties:
+        idMovimiento:
+          type: integer
+        idAlmacen:
+          type: integer
+        fecha:
+          type: string
+          format: date-time
+        sku:
+          type: string
+        cantidad:
+          type: number
+        tipoMovimiento:
+          type: string
+
+    OrdenProduccion:
+      type: object
+      properties:
+        idOp:
+          type: integer
+        idAlmacen:
+          type: integer
+        sku:
+          type: string
+        cantidad:
+          type: integer
+        responsable:
+          type: string
+        estado:
+          type: string
+
+    CambiarEstadoOpRequest:
+      type: object
+      properties:
+        idOp:
+          type: integer
+        responsable:
+          type: string
+
+    CambioOp:
+      type: object
+      properties:
+        idCambio:
+          type: integer
+        idOp:
+          type: integer
+        nuevoEstado:
+          type: string
+        responsable:
+          type: string
+        fechaCambio:
+          type: string
+          format: date-time

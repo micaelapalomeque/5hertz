@@ -10,4 +10,6 @@ public interface BomRepository extends JpaRepository<Bom, Integer>{
 
 	List<Bom> findBySkuProductoFinal(String skuProductoFinal);
 	
+	void deleteBySkuProductoFinal(String skuProductoFinal);
+	
 }
