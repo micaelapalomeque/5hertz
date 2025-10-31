@@ -50,24 +50,21 @@ public class OrdenProduccionService {
 
 	    OrdenProduccion op = opt.get();
 	    
-	    if (!op.getEstado().equals("planificada") || !hayStockParaFabricar(op.getIdAlmacen(), op.getSku(), op.getCantidad())) {
+	    if (!(op.getEstado().equals("planificada") || op.getEstado().equals("pausada")) || !hayStockParaFabricar(op.getIdAlmacen(), op.getSku(), op.getCantidad())) {
 	        return;
 	    }
 	    
 	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
 	    
 	    for (Bom bom : listaMateriales) {
-	        stockAlmacenService.reservarMaterial(
-	            bom.getSkuMaterial(),
-	            op.getIdAlmacen(),
-	            op.getCantidad() * bom.getCanPorUnidad()
-	        );
+	        stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), op.getCantidad() * bom.getCanPorUnidad());
 	    }
+	    
 	    op.setEstado("activa");
 	    ordenProduccionRepository.save(op);
 	    cambioOpService.registrarCambio(idOp, "activa", responsable);
 	}
-
+	
 	public void consumirOp(int idOp, String responsable) {
 		Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
@@ -90,6 +87,7 @@ public class OrdenProduccionService {
     	cambioOpService.registrarCambio(idOp, "consumida", responsable);
 	}
 	
+	//Falta implementar registro de material
 	public void cancelarOp(int idOp, String responsable) {
 		Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
@@ -97,7 +95,7 @@ public class OrdenProduccionService {
 
 	    OrdenProduccion op = opt.get();
 	    
-	    if(!op.getEstado().equals("activa") || op.getEstado().equals("planificada")) {
+	    if(op.getEstado().equals("consumida")) {
 	    	return;
 	    }
 	    
@@ -112,6 +110,7 @@ public class OrdenProduccionService {
     	cambioOpService.registrarCambio(idOp, "cancelada", responsable);
 	}
 	
+	//Falta implementar registro de material
 	public void inactivarOp(int idOp, String responsable) {
 		Optional<OrdenProduccion> opt = consultarOp(idOp);
 	    
