@@ -24,7 +24,7 @@ public class ReservaMaterialService {
 	}
 	
 	public Integer consultarMaterialReservado(int idOp, String sku) {
-		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpSku(idOp, sku);
+		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpAndSku(idOp, sku);
 		if(opt.isPresent()) {
 			ReservaMaterial reserva = opt.get();
 		return reserva.getCantidadReservada();
@@ -33,7 +33,7 @@ public class ReservaMaterialService {
 	}
 	
 	public Integer consultarMaterialConsumido(int idOp, String sku) {
-		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpSku(idOp, sku);
+		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpAndSku(idOp, sku);
 		if(opt.isPresent()) {
 			ReservaMaterial reserva = opt.get();
 		return reserva.getCantidadConsumida();
@@ -42,7 +42,7 @@ public class ReservaMaterialService {
 	}
 	
 	public int consultarDiferencia(int idOp, String sku) {
-		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpSku(idOp, sku);
+		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpAndSku(idOp, sku);
 		if(opt.isPresent()) {
 			return opt.get().getCantidadReservada() - opt.get().getCantidadConsumida();
 		}
@@ -50,7 +50,7 @@ public class ReservaMaterialService {
 	}
 	
 	public int consultarCantidadPendiente(int idOp, String sku) {
-		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpSku(idOp, sku);
+		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpAndSku(idOp, sku);
 		if(opt.isPresent()) {
 			return opt.get().getCantidadPendiente();		
 		}
@@ -63,7 +63,7 @@ public class ReservaMaterialService {
 	}
 	
 	public void modificarCantidadReservada(int idOp, String sku, int cantidadReservada) {
-		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpSku(idOp, sku);
+		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpAndSku(idOp, sku);
 		if(opt.isPresent()) {
 			ReservaMaterial reserva = opt.get();
 			reserva.setCantidadReservada(cantidadReservada);
@@ -72,7 +72,7 @@ public class ReservaMaterialService {
 	}
 	
 	public void modificarCantidadConsumida(int idOp, String sku, int cantidadConsumida) {
-		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpSku(idOp, sku);
+		Optional<ReservaMaterial> opt = reservaMaterialRepository.findByIdOpAndSku(idOp, sku);
 		if(opt.isPresent()) {
 			ReservaMaterial reserva = opt.get();
 			reserva.setCantidadConsumida(cantidadConsumida);

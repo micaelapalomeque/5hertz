@@ -2,18 +2,18 @@ package com.proyecto_final.controller;
 
 import java.util.Optional;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import com.proyecto_final.model.OrdenProduccion;
 import com.proyecto_final.service.OrdenProduccionService;
 import request.CambiarEstadoOpRequest;
 
-@Controller
+@RestController
 @RequestMapping("/ordenes-produccion")
 public class OrdenProduccionController {
 

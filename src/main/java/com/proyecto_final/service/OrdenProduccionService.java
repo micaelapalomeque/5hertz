@@ -18,8 +18,9 @@ public class OrdenProduccionService {
 	private OrdenProduccionRepository ordenProduccionRepository;
 
 	public OrdenProduccionService(OrdenProduccionRepository ordenProduccionRepository, 
-			CambioOpService cambioOpService, StockAlmacenService stockAlmacenService, BomService bomService) {
+			CambioOpService cambioOpService, StockAlmacenService stockAlmacenService, BomService bomService, ReservaMaterialService reservaMaterialService) {
 		this.ordenProduccionRepository = ordenProduccionRepository;
+		this.reservaMaterialService = reservaMaterialService;
 		this.cambioOpService = cambioOpService;
 		this.stockAlmacenService = stockAlmacenService;
 		this.bomService = bomService;
@@ -66,6 +67,7 @@ public class OrdenProduccionService {
 	    for (Bom bom : listaMateriales) {
 	        stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), op.getCantidad() * bom.getCanPorUnidad());
 	        reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), op.getCantidad() * bom.getCanPorUnidad());
+	        //actualizar la cantidad pendiente
 	    }
 	    
 	    op.setEstado("activa");

@@ -11,5 +11,5 @@ public interface ReservaMaterialRepository extends JpaRepository<ReservaMaterial
 
 	public List<ReservaMaterial> findByIdOp(int idOp);
 	
-	public Optional<ReservaMaterial> findByIdOpSku(int idOp, String sku);
+	public Optional<ReservaMaterial> findByIdOpAndSku(int idOp, String sku);
 }
