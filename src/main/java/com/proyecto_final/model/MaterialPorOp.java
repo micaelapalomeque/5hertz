@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "reserva_material")
-public class ReservaMaterial {
+public class MaterialPorOp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +24,11 @@ public class ReservaMaterial {
     @Column(name = "cantidad_reservada", nullable = false)
     private int cantidadReservada;
 
-    @Column(name = "cantidad_consumida", nullable = false)
+    @Column(name = "cantidad_consumida")
     private int cantidadConsumida = 0;
+    
+    @Column(name = "cantidad_desperdiciada")
+    private int cantidadDesperdiciada = 0;
     
     @Column(name = "cantidad_pendiente")
     private int cantidadPendiente;
@@ -33,7 +36,7 @@ public class ReservaMaterial {
     @Column(name = "fecha_reserva", insertable = false, updatable = false)
     private java.time.LocalDateTime fechaReserva;
 
-    public ReservaMaterial(int idOp, String sku, int cantidadReservada) {
+    public MaterialPorOp(int idOp, String sku, int cantidadReservada) {
     	this.idOp = idOp;
     	this.sku = sku;
     	this.cantidadReservada = cantidadReservada;

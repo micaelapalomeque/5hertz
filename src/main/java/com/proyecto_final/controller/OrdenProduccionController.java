@@ -1,5 +1,6 @@
 package com.proyecto_final.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,11 @@ public class OrdenProduccionController {
 		return ordenProduccionService.consultarOp(idOp);
 	}
 	
+	@GetMapping("/consultar/todas")
+	public List<OrdenProduccion> consultarTodas() {
+		return ordenProduccionService.consultarTodas();
+	}
+	
 	@PutMapping("/activar")
 	public void activarOp(@RequestBody CambiarEstadoOpRequest request) {
 		ordenProduccionService.activarOp(request.getIdOp(), request.getResponsable());
@@ -48,9 +54,14 @@ public class OrdenProduccionController {
 		ordenProduccionService.cancelarOp(request.getIdOp(), request.getResponsable());
 	}
 	
-	@PutMapping("/inactivar")
+	@PutMapping("/pausar")
 	public void inactivarOp(@RequestBody CambiarEstadoOpRequest request) {
 		ordenProduccionService.pausarOp(request.getIdOp(), request.getResponsable());
+	}
+	
+	@PutMapping("/reanudar")
+	public void reanudarOp(@RequestBody CambiarEstadoOpRequest request) {
+		ordenProduccionService.reanudarOp(request.getIdOp(), request.getResponsable());
 	}
 	
 }
