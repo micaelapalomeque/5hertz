@@ -33,6 +33,10 @@ public class ProductoService {
     public List<Producto> obtenerTodos() {
     	return productoRepository.findAll();
     }
+    
+    public List<Producto> obtenerProductosDisponiblesParaStock() {
+    	return productoRepository.findProductosNoEnStock();
+    }
 
 }
 

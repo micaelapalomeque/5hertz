@@ -63,4 +63,9 @@ public class ProductoController {
 		return productoService.obtenerTodos();
 	}
 	
+	@GetMapping("/disponibles-stock")
+	public List<Producto> obtenerProductosDisponiblesParaStock() {
+		return productoService.obtenerProductosDisponiblesParaStock();
+	}
+	
 }
