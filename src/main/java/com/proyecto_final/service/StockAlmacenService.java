@@ -32,9 +32,26 @@ public class StockAlmacenService {
 		return stockAlmacenRepository.findByIdAlmacen(idAlmacen);
 	}
 	
-	public void habilitarProducto(int idAlmacen, String sku) {
-        Optional<StockAlmacen> opt = stockAlmacenRepository.findBySku(sku);
+	
+    public boolean hayStockDisponible(String sku, int idAlmacen, int cantidad) {
+    	return consultarStockProducto(sku, idAlmacen).getStockDisponible() >= cantidad;
+    }
 
+    public List<StockAlmacen> listarStock() {
+    	return stockAlmacenRepository.findAll();
+    }
+
+    public void modificarCantidadMinima(String sku, int idAlmacen, int cantidadMinima) {
+    	if(estaProductoHabilitado(sku, idAlmacen)) {
+    		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
+    		registro.setCantidadMinima(cantidadMinima);
+    		stockAlmacenRepository.save(registro);
+    	}
+    }
+    
+	public void habilitarProducto(int idAlmacen, String sku) {
+        Optional<StockAlmacen> opt = stockAlmacenRepository.findBySku(sku);        
+        
         if (opt.isEmpty()) {
         	 StockAlmacen nuevoStock = new StockAlmacen();
              nuevoStock.setIdAlmacen(idAlmacen);
@@ -48,7 +65,7 @@ public class StockAlmacenService {
         }
     }
 	
-	public void incrementarStockTotal(String sku, int idAlmacen, int cantidad) {
+	public void ingresarMaterial(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
 			registro.setCantidad(registro.getCantidad() + cantidad);
@@ -59,14 +76,14 @@ public class StockAlmacenService {
 		}
 	}
 	
-	public void reducirStockTotal(String sku, int idAlmacen, int cantidad) {
+	public void retirarMaterial(String sku, int idAlmacen, int cantidad) {
 		if(estaProductoHabilitado(sku, idAlmacen)) {
 			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
 			if(cantidad <= registro.getStockTotal()) {
 				registro.setStockTotal(registro.getStockTotal() - cantidad);
 				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
 				stockAlmacenRepository.save(registro);
-				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "EGRESO");
+				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "RETIRO");
 			}
 		}
 	}
@@ -95,7 +112,7 @@ public class StockAlmacenService {
 		}
 	}
 	
-    public void consumirMaterial(String sku, int idAlmacen, int cantidad) {
+    public void consumirMaterial(String sku, int idAlmacen, int cantidad, String tipoConsumicion) {
     	if(estaProductoHabilitado(sku, idAlmacen)) {
     		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
     		if(cantidad <= registro.getStockReservado()) {
@@ -103,24 +120,10 @@ public class StockAlmacenService {
     			registro.setStockDisponible(registro.getStockDisponible() - cantidad);
     			registro.setStockReservado(registro.getStockReservado() - cantidad);
     			stockAlmacenRepository.save(registro);
-				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "CONSUMO");
+				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, tipoConsumicion);
     		}
     	}
     }
-	
-    public boolean hayStockDisponible(String sku, int idAlmacen, int cantidad) {
-    	return consultarStockProducto(sku, idAlmacen).getStockDisponible() >= cantidad;
-    }
+    
 
-    public List<StockAlmacen> obtenerTodosLosStocks() {
-    	return stockAlmacenRepository.findAll();
-    }
-
-    public void actualizarCantidadMinima(String sku, int idAlmacen, int cantidadMinima) {
-    	if(estaProductoHabilitado(sku, idAlmacen)) {
-    		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
-    		registro.setCantidadMinima(cantidadMinima);
-    		stockAlmacenRepository.save(registro);
-    	}
-    }
 }

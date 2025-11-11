@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.proyecto_final.repository.OrdenProduccionRepository;
 import com.proyecto_final.model.OrdenProduccion;
-import com.proyecto_final.model.ReservaMaterial;
+import com.proyecto_final.model.MaterialPorOp;
 import com.proyecto_final.model.Bom;
 
 @Service
@@ -13,12 +13,12 @@ public class OrdenProduccionService {
 	
 	private CambioOpService cambioOpService;
 	private StockAlmacenService stockAlmacenService;
-	private ReservaMaterialService reservaMaterialService;
+	private MaterialPorOpService reservaMaterialService;
 	private BomService bomService;
 	private OrdenProduccionRepository ordenProduccionRepository;
 
 	public OrdenProduccionService(OrdenProduccionRepository ordenProduccionRepository, 
-			CambioOpService cambioOpService, StockAlmacenService stockAlmacenService, BomService bomService, ReservaMaterialService reservaMaterialService) {
+			CambioOpService cambioOpService, StockAlmacenService stockAlmacenService, BomService bomService, MaterialPorOpService reservaMaterialService) {
 		this.ordenProduccionRepository = ordenProduccionRepository;
 		this.reservaMaterialService = reservaMaterialService;
 		this.cambioOpService = cambioOpService;
@@ -40,6 +40,10 @@ public class OrdenProduccionService {
 	
 	public Optional<OrdenProduccion> consultarOp(int idOp) {
 		return ordenProduccionRepository.findById(idOp);
+	}
+	
+	public List<OrdenProduccion> consultarTodas() {
+		return ordenProduccionRepository.findAll();
 	}
 	
 	private boolean hayStockParaFabricar(int idAlmacen, String skuProductoFinal, int cantidad) {
@@ -67,7 +71,7 @@ public class OrdenProduccionService {
 	    for (Bom bom : listaMateriales) {
 	        stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), op.getCantidad() * bom.getCanPorUnidad());
 	        reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), op.getCantidad() * bom.getCanPorUnidad());
-	        //actualizar la cantidad pendiente
+	        reservaMaterialService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), op.getCantidad() * bom.getCanPorUnidad());
 	    }
 	    
 	    op.setEstado("activa");

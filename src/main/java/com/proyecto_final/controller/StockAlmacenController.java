@@ -31,14 +31,14 @@ public class StockAlmacenController {
 		stockAlmacenService.habilitarProducto(request.getIdAlmacen(), request.getSku());
 	}
 	
-	@PutMapping("/incrementar")
+	@PutMapping("/ingresar")
 	public void incrementarStock(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.incrementarStockTotal(request.getSku(), request.getIdAlmacen(), request.getCantidad());
+		stockAlmacenService.ingresarMaterial(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 	
-	@PutMapping("/reducir")
+	@PutMapping("/retirar")
 	public void reducirStock(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.reducirStockTotal(request.getSku(), request.getIdAlmacen(), request.getCantidad());
+		stockAlmacenService.retirarMaterial(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 	
 	@GetMapping("/consultar-almacen")
@@ -54,12 +54,12 @@ public class StockAlmacenController {
 	}
 
 	@GetMapping("/todos")
-	public List<StockAlmacen> obtenerTodosLosStocks() {
-		return stockAlmacenService.obtenerTodosLosStocks();
+	public List<StockAlmacen> listarStock() {
+		return stockAlmacenService.listarStock();
 	}
 
 	@PutMapping("/actualizar-minimo")
 	public void actualizarCantidadMinima(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.actualizarCantidadMinima(request.getSku(), request.getIdAlmacen(), request.getCantidad());
+		stockAlmacenService.modificarCantidadMinima(request.getSku(), request.getIdAlmacen(), request.getCantidad());
 	}
 }
