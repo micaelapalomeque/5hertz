@@ -13,6 +13,9 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
 	
 	@Query("SELECT p FROM Producto p WHERE p.sku NOT IN (SELECT s.sku FROM StockAlmacen s)")
 	List<Producto> findProductosNoEnStock();
+	
+	@Query("SELECT DISTINCT p FROM Producto p WHERE p.sku IN (SELECT b.skuProductoFinal FROM Bom b)")
+	List<Producto> findProductosConBom();
 	}
 
 

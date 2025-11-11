@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.proyecto_final.model.Bom;
+import com.proyecto_final.model.Producto;
 import com.proyecto_final.service.BomService;
 import request.BomRequest;
 
@@ -35,5 +36,10 @@ public class BomController {
     @DeleteMapping("/{sku}")
     public void eliminarBom(@PathVariable String sku) {
         bomService.eliminarBomProducto(sku);
+    }
+    
+    @GetMapping("/productos-fabricables")
+    public List<Producto> obtenerProductosFabricables() {
+        return bomService.obtenerProductosFabricables();
     }
 }
