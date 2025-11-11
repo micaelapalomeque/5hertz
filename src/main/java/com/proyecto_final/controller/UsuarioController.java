@@ -23,6 +23,11 @@ public class UsuarioController {
         return usuarioService.obtenerTodos();
     }
 
+    @GetMapping("/activos")
+    public List<Usuario> obtenerActivos() {
+        return usuarioService.obtenerActivos();
+    }
+
     @GetMapping("/rol/{rol}")
     public List<Usuario> obtenerPorRol(@PathVariable String rol) {
         return usuarioService.obtenerPorRol(rol);
@@ -43,6 +48,24 @@ public class UsuarioController {
     @PutMapping("/{id}/desactivar")
     public ResponseEntity<?> desactivarUsuario(@PathVariable int id) {
         usuarioService.desactivarUsuario(id);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @PutMapping("/{id}/activar")
+    public ResponseEntity<?> activarUsuario(@PathVariable int id) {
+        usuarioService.activarUsuario(id);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarUsuario(@PathVariable int id, @RequestBody Usuario usuario) {
+        Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, usuario);
+        return ResponseEntity.ok(Map.of("success", true, "data", usuarioActualizado));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarUsuario(@PathVariable int id) {
+        usuarioService.eliminarUsuario(id);
         return ResponseEntity.ok(Map.of("success", true));
     }
 }

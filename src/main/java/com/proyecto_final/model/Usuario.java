@@ -35,12 +35,16 @@ public class Usuario {
     @Column(name = "estacion_asignada")
     private String estacionAsignada;
 
-    public Usuario(String username, String password, String nombre, String rol, String estacionAsignada) {
+    @Column(name = "email")
+    private String email;
+
+    public Usuario(String username, String password, String nombre, String rol, String estacionAsignada, String email) {
         this.username = username;
         this.password = password;
         this.nombre = nombre;
         this.rol = rol;
         this.estacionAsignada = estacionAsignada;
+        this.email = email;
         this.activo = true;
     }
 }

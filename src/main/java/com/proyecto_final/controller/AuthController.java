@@ -34,7 +34,8 @@ public class AuthController {
                     "username", user.getUsername(),
                     "nombre", user.getNombre(),
                     "rol", user.getRol(),
-                    "estacion_asignada", user.getEstacionAsignada() != null ? user.getEstacionAsignada() : ""
+                    "estacion_asignada", user.getEstacionAsignada() != null ? user.getEstacionAsignada() : "",
+                    "email", user.getEmail() != null ? user.getEmail() : ""
                 )
             ));
         } else {

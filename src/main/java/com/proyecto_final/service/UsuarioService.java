@@ -20,6 +20,10 @@ public class UsuarioService {
     }
 
     public List<Usuario> obtenerTodos() {
+        return usuarioRepository.findAll();
+    }
+
+    public List<Usuario> obtenerActivos() {
         return usuarioRepository.findByActivoTrue();
     }
 
@@ -49,6 +53,36 @@ public class UsuarioService {
         if (opt.isPresent()) {
             Usuario usuario = opt.get();
             usuario.setActivo(false);
+            usuarioRepository.save(usuario);
+        }
+    }
+
+    public Usuario actualizarUsuario(int idUsuario, Usuario datosActualizados) {
+        Optional<Usuario> opt = usuarioRepository.findById(idUsuario);
+        if (opt.isPresent()) {
+            Usuario usuario = opt.get();
+            usuario.setUsername(datosActualizados.getUsername());
+            usuario.setNombre(datosActualizados.getNombre());
+            usuario.setRol(datosActualizados.getRol());
+            usuario.setEstacionAsignada(datosActualizados.getEstacionAsignada());
+            usuario.setEmail(datosActualizados.getEmail());
+            if (datosActualizados.getPassword() != null && !datosActualizados.getPassword().isEmpty()) {
+                usuario.setPassword(datosActualizados.getPassword());
+            }
+            return usuarioRepository.save(usuario);
+        }
+        return null;
+    }
+
+    public void eliminarUsuario(int idUsuario) {
+        usuarioRepository.deleteById(idUsuario);
+    }
+
+    public void activarUsuario(int idUsuario) {
+        Optional<Usuario> opt = usuarioRepository.findById(idUsuario);
+        if (opt.isPresent()) {
+            Usuario usuario = opt.get();
+            usuario.setActivo(true);
             usuarioRepository.save(usuario);
         }
     }
