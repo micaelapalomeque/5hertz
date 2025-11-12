@@ -7,6 +7,7 @@ import com.proyecto_final.repository.OrdenProduccionRepository;
 import com.proyecto_final.model.OrdenProduccion;
 import com.proyecto_final.model.MaterialPorOp;
 import com.proyecto_final.model.Bom;
+import com.proyecto_final.model.ConfigProduccion;
 
 @Service
 public class OrdenProduccionService {
@@ -15,15 +16,21 @@ public class OrdenProduccionService {
 	private StockAlmacenService stockAlmacenService;
 	private MaterialPorOpService reservaMaterialService;
 	private BomService bomService;
+	private LoteProcesoService loteProcesoService;
+	private ConfigProduccionService configProduccionService;
 	private OrdenProduccionRepository ordenProduccionRepository;
 
 	public OrdenProduccionService(OrdenProduccionRepository ordenProduccionRepository, 
-			CambioOpService cambioOpService, StockAlmacenService stockAlmacenService, BomService bomService, MaterialPorOpService reservaMaterialService) {
+			CambioOpService cambioOpService, StockAlmacenService stockAlmacenService, BomService bomService, 
+			MaterialPorOpService reservaMaterialService, LoteProcesoService loteProcesoService,
+			ConfigProduccionService configProduccionService) {
 		this.ordenProduccionRepository = ordenProduccionRepository;
 		this.reservaMaterialService = reservaMaterialService;
 		this.cambioOpService = cambioOpService;
 		this.stockAlmacenService = stockAlmacenService;
 		this.bomService = bomService;
+		this.loteProcesoService = loteProcesoService;
+		this.configProduccionService = configProduccionService;
 	}
 
 	public void crearOp(int idAlmacen, String sku, int cantidad, String responsable) {
@@ -77,6 +84,11 @@ public class OrdenProduccionService {
 	    op.setEstado("activa");
 	    ordenProduccionRepository.save(op);
 	    cambioOpService.registrarCambio(idOp, "activa", responsable);
+	    
+	    // Crear lotes iniciales usando configuración
+	    ConfigProduccion config = configProduccionService.obtenerConfiguracion();
+	    int tamanoLote = op.getCantidad() / config.getNumeroLotesFijo();
+	    loteProcesoService.crearLotesIniciales(idOp, op.getCantidad(), tamanoLote);
 	}
 	
 	public void consumirOp(int idOp, String responsable) {
