@@ -1,5 +1,6 @@
 package com.proyecto_final.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class OrdenProduccionService {
 		return ordenProduccionRepository.findAll();
 	}
 	
-	private boolean hayStockParaFabricar(int idAlmacen, String skuProductoFinal, int cantidad) {
+	public boolean hayStockParaFabricar(int idAlmacen, String skuProductoFinal, int cantidad) {
 		List<Bom> listaMateriales = bomService.obtenerListaMateriales(skuProductoFinal);
 		for(Bom bom : listaMateriales) {
 			if(!stockAlmacenService.hayStockDisponible(bom.getSkuMaterial(), idAlmacen, bom.getCanPorUnidad() * cantidad)) {
@@ -61,6 +62,15 @@ public class OrdenProduccionService {
 			}
 		}
 		return true;
+	}
+	
+	public HashMap<String, Integer> calcularRecursosParaFabricar(String skuProductoFinal, int cantidad) {
+		List<Bom> listaMateriales = bomService.obtenerListaMateriales(skuProductoFinal);	
+		HashMap<String, Integer> cantidadPorMaterial = new HashMap<String, Integer>();
+		for(Bom material : listaMateriales) {
+			cantidadPorMaterial.put(material.getSkuMaterial(), material.getCanPorUnidad() * cantidad);
+		}
+		return cantidadPorMaterial;
 	}
 
 	public void activarOp(int idOp, String responsable) {
@@ -84,7 +94,6 @@ public class OrdenProduccionService {
 	    op.setEstado("activa");
 	    ordenProduccionRepository.save(op);
 	    cambioOpService.registrarCambio(idOp, "activa", responsable);
-	    
 	    // Crear lotes iniciales usando configuración
 	    ConfigProduccion config = configProduccionService.obtenerConfiguracion();
 	    int tamanoLote = op.getCantidad() / config.getNumeroLotesFijo();

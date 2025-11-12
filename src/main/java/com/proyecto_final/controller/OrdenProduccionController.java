@@ -1,8 +1,8 @@
 package com.proyecto_final.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.proyecto_final.model.OrdenProduccion;
 import com.proyecto_final.service.OrdenProduccionService;
 import request.CambiarEstadoOpRequest;
+import request.ConsultarRecursosRequest;
 
 @RestController
 @RequestMapping("/ordenes-produccion")
@@ -62,6 +63,11 @@ public class OrdenProduccionController {
 	@PutMapping("/reanudar")
 	public void reanudarOp(@RequestBody CambiarEstadoOpRequest request) {
 		ordenProduccionService.reanudarOp(request.getIdOp(), request.getResponsable());
+	}
+	
+	@GetMapping("consultar-recursos")
+	public HashMap<String, Integer> consultarRecursosParaProducir(@RequestBody ConsultarRecursosRequest request) {
+		return ordenProduccionService.calcularRecursosParaFabricar(request.getSku(), request.getCantidad());
 	}
 	
 }
