@@ -15,10 +15,10 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // 🔸 Desactiva CSRF (necesario para POST desde fuera del navegador)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // ✅ Habilita CORS
+            .csrf(csrf -> csrf.disable()) 
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()  // ✅ Permite todas las solicitudes
+                .anyRequest().permitAll() 
             );
 
         return http.build();
