@@ -29,6 +29,12 @@ public class LoteProcesoService {
             LoteProceso lote = new LoteProceso();
             lote.setIdOp(idOp);
             lote.setUnidadesLote(unidadesEnEsteLote);
+            
+            // Calcular peso del lote basado en configuración
+            double pesoTotalOrden = (cantidadTotal * 0.5); // 500g por unidad por defecto
+            double pesoLote = pesoTotalOrden / lotesPorCrear;
+            lote.setPesoLoteKg(pesoLote);
+            
             lote.setEstacionActual("LAVADO");
             lote.setEstado("EN_PROCESO");
             lote.setFechaInicio(LocalDateTime.now());
@@ -96,6 +102,19 @@ public class LoteProcesoService {
             case "EMPAQUETADO": return null; // Última estación
             default: return null;
         }
+    }
+    
+    // Cancelar todos los lotes de una orden
+    public void cancelarLotesPorOrden(int idOp) {
+        List<LoteProceso> lotes = loteProcesoRepository.findByIdOp(idOp);
+        for (LoteProceso lote : lotes) {
+            if (!lote.getEstado().equals("COMPLETADO")) {
+                lote.setEstado("CANCELADO");
+                lote.setFechaFin(LocalDateTime.now());
+                loteProcesoRepository.save(lote);
+            }
+        }
+        System.out.println("Cancelados " + lotes.size() + " lotes de la orden " + idOp);
     }
     
     // Verificar si todos los lotes están completados y finalizar orden

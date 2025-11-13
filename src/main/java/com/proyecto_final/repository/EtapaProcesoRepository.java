@@ -10,10 +10,9 @@ import com.proyecto_final.model.EtapaProceso;
 @Repository
 public interface EtapaProcesoRepository extends JpaRepository<EtapaProceso, Integer> {
     
-    // Obtener etapas por orden de producción
-    List<EtapaProceso> findByIdOp(int idOp);
+    // Obtener etapas por proceso (catálogo fijo)
+    List<EtapaProceso> findByIdProcesoOrderByOrden(int idProceso);
     
-    // Obtener etapas pendientes por nombre de etapa
-    @Query("SELECT e FROM EtapaProceso e WHERE e.nombreEtapa = :nombreEtapa AND e.estado = 'PENDIENTE'")
-    List<EtapaProceso> findEtapasPendientesPorNombre(@Param("nombreEtapa") String nombreEtapa);
+    // Obtener etapa por nombre
+    EtapaProceso findByNombreEtapa(String nombreEtapa);
 }

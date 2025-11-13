@@ -25,6 +25,9 @@ public class LoteProceso {
     @Column(name = "unidades_lote", nullable = false)
     private int unidadesLote;
     
+    @Column(name = "peso_lote_kg", nullable = false)
+    private double pesoLoteKg;
+    
     @Column(name = "estacion_actual", nullable = false)
     private String estacionActual = "LAVADO";
 

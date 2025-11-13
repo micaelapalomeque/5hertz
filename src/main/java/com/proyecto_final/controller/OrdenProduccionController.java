@@ -31,8 +31,9 @@ public class OrdenProduccionController {
 	}
 	
 	@GetMapping("/consultar/{idOp}")
-	public Optional<OrdenProduccion> consultarOp(@PathVariable int idOp) {
-		return ordenProduccionService.consultarOp(idOp);
+	public OrdenProduccion consultarOp(@PathVariable int idOp) {
+		return ordenProduccionService.consultarOp(idOp)
+			.orElseThrow(() -> new RuntimeException("Orden no encontrada"));
 	}
 	
 	@GetMapping("/consultar/todas")

@@ -88,5 +88,14 @@ public class MaterialPorOpService {
 			materialPorOpRepository.save(reserva);
 		}
 	}
+	
+	public void registrarDesperdicio(int idOp, String sku, int cantidadDesperdiciada) {
+		Optional<MaterialPorOp> opt = materialPorOpRepository.findByIdOpAndSku(idOp, sku);
+		if(opt.isPresent()) {
+			MaterialPorOp reserva = opt.get();
+			reserva.setCantidadDesperdiciada(reserva.getCantidadDesperdiciada() + cantidadDesperdiciada);
+			materialPorOpRepository.save(reserva);
+		}
+	}
 
 }

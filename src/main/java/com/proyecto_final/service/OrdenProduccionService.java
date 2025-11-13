@@ -265,6 +265,9 @@ public class OrdenProduccionService {
 	    if(!op.getEstado().equals("pausada")) {
 	    	pausarOp(idOp, responsable);
 	    }	
+	    
+	    // Cancelar todos los lotes de esta orden
+	    loteProcesoService.cancelarLotesPorOrden(idOp);
 	     
 	    op.setEstado("cancelada");
     	ordenProduccionRepository.save(op);
