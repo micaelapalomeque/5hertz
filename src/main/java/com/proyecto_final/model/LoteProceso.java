@@ -16,14 +16,17 @@ public class LoteProceso {
     @Column(name = "id_lote")
     private int idLote;
 
+    @Column(name = "id_etapa", nullable = false)
+    private int idEtapa;
+    
     @Column(name = "id_op", nullable = false)
     private int idOp;
 
-    @Column(name = "estacion_actual", nullable = false)
-    private String estacionActual;
-
     @Column(name = "unidades_lote", nullable = false)
     private int unidadesLote;
+    
+    @Column(name = "estacion_actual", nullable = false)
+    private String estacionActual = "LAVADO";
 
     @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio = LocalDateTime.now();
@@ -35,11 +38,12 @@ public class LoteProceso {
     private Integer operarioResponsable;
 
     @Column(name = "estado")
-    private String estado = "PENDIENTE"; // PENDIENTE, EN_PROCESO, COMPLETADO
+    private String estado = "EN_PROCESO"; // EN_PROCESO, COMPLETADO
 
-    public LoteProceso(int idOp, String estacionActual, int unidadesLote) {
+    public LoteProceso(int idEtapa, int idOp, int unidadesLote) {
+        this.idEtapa = idEtapa;
         this.idOp = idOp;
-        this.estacionActual = estacionActual;
         this.unidadesLote = unidadesLote;
+        this.estacionActual = "LAVADO";
     }
 }

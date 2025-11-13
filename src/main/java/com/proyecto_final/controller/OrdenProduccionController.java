@@ -40,8 +40,35 @@ public class OrdenProduccionController {
 	}
 	
 	@PutMapping("/activar")
-	public void activarOp(@RequestBody CambiarEstadoOpRequest request) {
-		ordenProduccionService.activarOp(request.getIdOp(), request.getResponsable());
+	public String activarOp(@RequestBody CambiarEstadoOpRequest request) {
+		try {
+			System.out.println("=== CONTROLADOR: Iniciando activación orden " + request.getIdOp() + " ===");
+			
+			// Cambiar estado inmediatamente
+			ordenProduccionService.cambiarEstadoRapido(request.getIdOp(), "activa", request.getResponsable());
+			
+			// Procesar reservas y lotes en segundo plano
+			new Thread(() -> {
+				try {
+					System.out.println("=== Procesando reservas y lotes en segundo plano ===");
+					ordenProduccionService.procesarReservasYLotes(request.getIdOp(), request.getResponsable());
+					System.out.println("=== Reservas y lotes completados ===");
+				} catch (Exception e) {
+					System.err.println("Error en proceso asíncrono: " + e.getMessage());
+					e.printStackTrace();
+					// Si falla el proceso asíncrono, revertir estado
+					ordenProduccionService.cambiarEstadoRapido(request.getIdOp(), "planificada", request.getResponsable());
+				}
+			}).start();
+			
+			return "Orden activada. Procesando reservas...";
+			
+		} catch (Exception e) {
+			System.err.println("=== ERROR EN CONTROLADOR ===");
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 	}
 	
 	@PutMapping("/consumir")
@@ -62,6 +89,34 @@ public class OrdenProduccionController {
 	@PutMapping("/reanudar")
 	public void reanudarOp(@RequestBody CambiarEstadoOpRequest request) {
 		ordenProduccionService.reanudarOp(request.getIdOp(), request.getResponsable());
+	}
+	
+	// Endpoint simple para debug
+	@PutMapping("/activar-simple")
+	public void activarOpSimple(@RequestBody CambiarEstadoOpRequest request) {
+		try {
+			System.out.println("=== ACTIVACIÓN SIMPLE ===");
+			ordenProduccionService.activarOpSimple(request.getIdOp(), request.getResponsable());
+			System.out.println("=== ACTIVACIÓN SIMPLE EXITOSA ===");
+		} catch (Exception e) {
+			System.err.println("Error en activación simple: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	
+	// Endpoint para forzar creación de lotes
+	@PostMapping("/crear-lotes/{idOp}")
+	public String crearLotesForzado(@PathVariable int idOp) {
+		try {
+			System.out.println("=== FORZANDO CREACIÓN DE LOTES ===");
+			ordenProduccionService.procesarReservasYLotes(idOp, "DEBUG");
+			return "Lotes creados para orden " + idOp;
+		} catch (Exception e) {
+			System.err.println("Error forzando lotes: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 	}
 	
 }

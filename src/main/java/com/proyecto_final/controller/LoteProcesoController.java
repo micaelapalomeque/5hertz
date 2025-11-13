@@ -27,9 +27,15 @@ public class LoteProcesoController {
         loteProcesoService.completarLote(idLote, idOperario);
     }
     
-    // Obtener todos los lotes de una orden específica
-    @GetMapping("/orden/{idOp}")
-    public List<LoteProceso> obtenerLotesPorOrden(@PathVariable int idOp) {
-        return loteProcesoService.obtenerLotesPorOrden(idOp);
+    // Obtener lotes por etapa
+    @GetMapping("/etapa/{idEtapa}")
+    public List<LoteProceso> obtenerLotesPorEtapa(@PathVariable int idEtapa) {
+        return loteProcesoService.obtenerLotesPorEtapa(idEtapa);
+    }
+    
+    // Debug: obtener todos los lotes
+    @GetMapping("/debug/todos")
+    public List<LoteProceso> obtenerTodosLosLotes() {
+        return loteProcesoService.obtenerTodosLosLotes();
     }
 }

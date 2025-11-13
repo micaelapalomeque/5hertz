@@ -10,13 +10,17 @@ import com.proyecto_final.model.LoteProceso;
 @Repository
 public interface LoteProcesoRepository extends JpaRepository<LoteProceso, Integer> {
     
-    // Obtener lotes pendientes en una estación específica
+    // Obtener lotes por etapa
+    List<LoteProceso> findByIdEtapa(int idEtapa);
+    
+    // Obtener lotes pendientes por estación
     List<LoteProceso> findByEstacionActualAndEstado(String estacionActual, String estado);
     
-    // Obtener todos los lotes de una orden
-    List<LoteProceso> findByIdOp(int idOp);
-    
-    // Obtener lotes pendientes para un operario específico
-    @Query("SELECT l FROM LoteProceso l WHERE l.estacionActual = :estacion AND l.estado = 'PENDIENTE'")
+    // Método alternativo usando query
+    @Query("SELECT l FROM LoteProceso l WHERE l.estacionActual = :estacion AND l.estado = 'EN_PROCESO'")
     List<LoteProceso> findLotesPendientesPorEstacion(@Param("estacion") String estacion);
+    
+    // Método alternativo más simple para debug
+    @Query("SELECT l FROM LoteProceso l WHERE l.estado = 'EN_PROCESO'")
+    List<LoteProceso> findAllLotesPendientes();
 }

@@ -30,7 +30,7 @@ public class OrdenProduccion {
 	private int cantidad;
 	
 	@Column(name = "estado")
-	private String estado;
+	private String estado = "planificada";
 	
 	@Column(name = "responsable")
 	private String responsable;
