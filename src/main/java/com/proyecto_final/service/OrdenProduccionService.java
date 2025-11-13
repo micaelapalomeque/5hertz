@@ -65,31 +65,10 @@ public class OrdenProduccionService {
         ordenProduccionRepository.save(op);
         cambioOpService.registrarCambio(op.getIdOp(), "planificada", responsable);
 
-<<<<<<< HEAD
-	    OrdenProduccion op = opt.get();
-	    
-	    if(op.getEstado().equals("consumida") || op.getEstado().equals("cancelada")) {
-	    	return;
-	    }
-	    
-	    if(!op.getEstado().equals("pausada")) {
-	    	pausarOp(idOp, responsable);
-	    }	
-	    
-	    // Cancelar todos los lotes de esta orden
-	    loteProcesoService.cancelarLotesPorOrden(idOp);
-	     
-	    op.setEstado("cancelada");
-    	ordenProduccionRepository.save(op);
-    	cambioOpService.registrarCambio(idOp, "cancelada", responsable);
-	}
-	
-=======
         List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
         for (Bom bom : materiales) {
             materialPorOpService.registrarReserva(op.getIdOp(), bom.getSkuMaterial(), 0);
         }
->>>>>>> 0556cc9d964ed704f9de0d6cb6eb8e80acfa2551
 
         return true;
     }
@@ -137,7 +116,7 @@ public class OrdenProduccionService {
 
     public boolean activarOp(int idOp, String responsable) {
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
 
         OrdenProduccion op = opt.get();
         if (!esEstado(op, "planificada")) return false;
@@ -172,7 +151,7 @@ public class OrdenProduccionService {
 
     public boolean activarOpSimple(int idOp, String responsable) {
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
         if (responsable == null || responsable.isBlank()) return false;
 
         OrdenProduccion op = opt.get();
@@ -188,7 +167,7 @@ public class OrdenProduccionService {
         if (responsable == null || responsable.isBlank()) return false;
 
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
 
         OrdenProduccion op = opt.get();
         op.setEstado(nuevoEstado);
@@ -200,7 +179,7 @@ public class OrdenProduccionService {
 
     public boolean procesarReservasYLotes(int idOp, String responsable) {
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
         if (responsable == null || responsable.isBlank()) return false;
 
         OrdenProduccion op = opt.get();
@@ -227,7 +206,7 @@ public class OrdenProduccionService {
 
     public boolean consumirOp(int idOp, String responsable) {
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
         if (responsable == null || responsable.isBlank()) return false;
 
         OrdenProduccion op = opt.get();
@@ -241,7 +220,7 @@ public class OrdenProduccionService {
                         bom.getSkuMaterial(),
                         op.getIdAlmacen(),
                         cantidadReservada,
-                        "CONSUMO_PRODUCCION"
+                        responsable
                 );
                 materialPorOpService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), 0);
                 materialPorOpService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), 0);
@@ -257,7 +236,7 @@ public class OrdenProduccionService {
 
     public boolean pausarOp(int idOp, String responsable) {
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
         if (responsable == null || responsable.isBlank()) return false;
 
         OrdenProduccion op = opt.get();
@@ -281,7 +260,7 @@ public class OrdenProduccionService {
 
     public boolean reanudarOp(int idOp, String responsable) {
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
         if (responsable == null || responsable.isBlank()) return false;
 
         OrdenProduccion op = opt.get();
@@ -308,7 +287,7 @@ public class OrdenProduccionService {
 
     public boolean cancelarOp(int idOp, String responsable) {
         Optional<OrdenProduccion> opt = obtenerOp(idOp);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
         if (responsable == null || responsable.isBlank()) return false;
 
         OrdenProduccion op = opt.get();
@@ -320,6 +299,9 @@ public class OrdenProduccionService {
         if (!esEstado(op, "pausada")) {
             pausarOp(idOp, responsable);
         }
+
+        // Cancelar todos los lotes de esta orden
+        loteProcesoService.cancelarLotesPorOrden(idOp);
 
         op.setEstado("cancelada");
         ordenProduccionRepository.save(op);

@@ -9,27 +9,7 @@ import com.proyecto_final.repository.MaterialPorOpRepository;
 @Service
 public class MaterialPorOpService {
 
-<<<<<<< HEAD
-	public void modificarCantidadPendiente(int idOp, String sku, int cantidadPendiente) {
-		Optional<MaterialPorOp> opt = materialPorOpRepository.findByIdOpAndSku(idOp, sku);
-		if(opt.isPresent()) {
-			MaterialPorOp reserva = opt.get();
-			reserva.setCantidadPendiente(cantidadPendiente);
-			materialPorOpRepository.save(reserva);
-		}
-	}
-	
-	public void registrarDesperdicio(int idOp, String sku, int cantidadDesperdiciada) {
-		Optional<MaterialPorOp> opt = materialPorOpRepository.findByIdOpAndSku(idOp, sku);
-		if(opt.isPresent()) {
-			MaterialPorOp reserva = opt.get();
-			reserva.setCantidadDesperdiciada(reserva.getCantidadDesperdiciada() + cantidadDesperdiciada);
-			materialPorOpRepository.save(reserva);
-		}
-	}
-=======
     private final MaterialPorOpRepository materialPorOpRepository;
->>>>>>> 0556cc9d964ed704f9de0d6cb6eb8e80acfa2551
 
     public MaterialPorOpService(MaterialPorOpRepository materialPorOpRepository) {
         this.materialPorOpRepository = materialPorOpRepository;
@@ -92,7 +72,7 @@ public class MaterialPorOpService {
         if (datosInvalidos(idOp, sku, cantidadReservada)) return false;
 
         Optional<MaterialPorOp> opt = obtenerRegistro(idOp, sku);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
 
         MaterialPorOp reserva = opt.get();
         reserva.setCantidadReservada(cantidadReservada);
@@ -108,7 +88,7 @@ public class MaterialPorOpService {
         if (datosInvalidos(idOp, sku, cantidadConsumida)) return false;
 
         Optional<MaterialPorOp> opt = obtenerRegistro(idOp, sku);
-        if (opt.isEmpty()) return false;
+        if (!opt.isPresent()) return false;
 
         MaterialPorOp reserva = opt.get();
 
@@ -125,18 +105,22 @@ public class MaterialPorOpService {
 
     public boolean modificarCantidadPendiente(int idOp, String sku, int cantidadPendiente) {
         if (datosInvalidos(idOp, sku, cantidadPendiente)) return false;
-
-        Optional<MaterialPorOp> opt = obtenerRegistro(idOp, sku);
-        if (opt.isEmpty()) return false;
-
+        
+        Optional<MaterialPorOp> opt = materialPorOpRepository.findByIdOpAndSku(idOp, sku);
+        if(!opt.isPresent()) return false;
+        
         MaterialPorOp reserva = opt.get();
-
-        if (cantidadPendiente > reserva.getCantidadReservada()) return false;
-
         reserva.setCantidadPendiente(cantidadPendiente);
-
         materialPorOpRepository.save(reserva);
         return true;
     }
-}
 
+    public void registrarDesperdicio(int idOp, String sku, int cantidadDesperdiciada) {
+        Optional<MaterialPorOp> opt = materialPorOpRepository.findByIdOpAndSku(idOp, sku);
+        if(opt.isPresent()) {
+            MaterialPorOp reserva = opt.get();
+            reserva.setCantidadDesperdiciada(reserva.getCantidadDesperdiciada() + cantidadDesperdiciada);
+            materialPorOpRepository.save(reserva);
+        }
+    }
+}
