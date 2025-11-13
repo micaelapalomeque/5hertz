@@ -107,11 +107,6 @@ public class OrdenProduccionService {
 	    op.setEstado("activa");
 	    ordenProduccionRepository.save(op);
 	    cambioOpService.registrarCambio(idOp, "activa", responsable);
-<<<<<<< HEAD
-	    System.out.println("Orden marcada como activa");
-	    
-=======
->>>>>>> 2f2014f76da04135dd9908ad41ca440e46699cbb
 	    // Crear lotes iniciales usando configuración
 	    ConfigProduccion config = configProduccionService.obtenerConfiguracion();
 	    int tamanoLote = op.getCantidad() / config.getNumeroLotesFijo();
