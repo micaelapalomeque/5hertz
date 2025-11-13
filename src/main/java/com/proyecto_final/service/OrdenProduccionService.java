@@ -189,12 +189,12 @@ public class OrdenProduccionService {
 	    	return;
 	    }
 	    
-	    // Liberar todas las reservas cuando se consume la orden
+	    // Consumir definitivamente los materiales reservados
 	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
 	    
 	    for(Bom bom : listaMateriales) {
 	    	int cantidadReservada = reservaMaterialService.consultarMaterialReservado(idOp, bom.getSkuMaterial());
-	    	stockAlmacenService.liberarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidadReservada);
+	    	stockAlmacenService.consumirMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidadReservada, "CONSUMO_PRODUCCION");
 	    	reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), 0);
 	    	reservaMaterialService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), 0);
 	    }

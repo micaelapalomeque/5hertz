@@ -2,76 +2,50 @@ package com.proyecto_final.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import com.proyecto_final.model.LoteProceso;
-import com.proyecto_final.model.EtapaProceso;
 import com.proyecto_final.repository.LoteProcesoRepository;
-import com.proyecto_final.repository.EtapaProcesoRepository;
 
 @Service
 public class LoteProcesoService {
     
     private final LoteProcesoRepository loteProcesoRepository;
-    private final EtapaProcesoRepository etapaProcesoRepository;
     
-    public LoteProcesoService(LoteProcesoRepository loteProcesoRepository, EtapaProcesoRepository etapaProcesoRepository) {
+    private final OrdenProduccionService ordenProduccionService;
+    
+    public LoteProcesoService(LoteProcesoRepository loteProcesoRepository, @Lazy OrdenProduccionService ordenProduccionService) {
         this.loteProcesoRepository = loteProcesoRepository;
-        this.etapaProcesoRepository = etapaProcesoRepository;
+        this.ordenProduccionService = ordenProduccionService;
     }
     
-    // Método simplificado: crear lotes directamente sin etapas
+    // Crear lotes iniciales para una orden (en estación LAVADO)
     public void crearLotesIniciales(int idOp, int cantidadTotal, int tamanoLote) {
-        System.out.println("=== CREANDO LOTES DIRECTOS ===");
-        System.out.println("ID OP: " + idOp);
-        System.out.println("Cantidad total: " + cantidadTotal);
-        System.out.println("Tamaño lote: " + tamanoLote);
+        int lotesPorCrear = (int) Math.ceil((double) cantidadTotal / tamanoLote);
         
-        try {
-            // Crear etapa LAVADO para esta orden
-            EtapaProceso etapaLavado = new EtapaProceso();
-            etapaLavado.setIdProceso(1);
-            etapaLavado.setOrden(1);
-            etapaLavado.setNombreEtapa("LAVADO");
-            etapaLavado.setDescripcion("Lavado y desinfección");
-            etapaLavado.setIdOp(idOp);
-            etapaLavado.setCantidadTotalUnidades(cantidadTotal);
-            etapaLavado.setCantidadPendienteUnidades(cantidadTotal);
-            etapaLavado.setEstado("PENDIENTE");
-            etapaLavado.setFechaInicio(LocalDateTime.now());
+        for (int i = 0; i < lotesPorCrear; i++) {
+            int unidadesEnEsteLote = Math.min(tamanoLote, cantidadTotal - (i * tamanoLote));
             
-            EtapaProceso etapaGuardada = etapaProcesoRepository.save(etapaLavado);
-            System.out.println("Etapa LAVADO creada con ID: " + etapaGuardada.getIdEtapa());
+            LoteProceso lote = new LoteProceso();
+            lote.setIdOp(idOp);
+            lote.setUnidadesLote(unidadesEnEsteLote);
+            lote.setEstacionActual("LAVADO");
+            lote.setEstado("EN_PROCESO");
+            lote.setFechaInicio(LocalDateTime.now());
+            lote.setIdEtapa(1); // Usar etapa por defecto
             
-            // Crear lotes para esta etapa
-            int lotesPorCrear = Math.max(1, (int) Math.ceil((double) cantidadTotal / tamanoLote));
-            System.out.println("Lotes a crear: " + lotesPorCrear);
-            
-            for (int i = 0; i < lotesPorCrear; i++) {
-                int unidadesEnEsteLote = Math.min(tamanoLote, cantidadTotal - (i * tamanoLote));
-                
-                LoteProceso lote = new LoteProceso();
-                lote.setIdEtapa(etapaGuardada.getIdEtapa());
-                lote.setIdOp(idOp);
-                lote.setUnidadesLote(unidadesEnEsteLote);
-                lote.setEstado("EN_PROCESO");
-                lote.setEstacionActual("LAVADO");
-                lote.setFechaInicio(LocalDateTime.now());
-                
-                LoteProceso loteGuardado = loteProcesoRepository.save(lote);
-                System.out.println("Lote " + (i+1) + " guardado - ID: " + loteGuardado.getIdLote() + ", Unidades: " + unidadesEnEsteLote);
-            }
-            
-            System.out.println("=== LOTES CREADOS EXITOSAMENTE ===");
-            
-        } catch (Exception e) {
-            System.err.println("ERROR CREANDO LOTES: " + e.getMessage());
-            e.printStackTrace();
+            loteProcesoRepository.save(lote);
         }
     }
     
     // Obtener lotes pendientes para una estación
     public List<LoteProceso> obtenerLotesPendientes(String estacion) {
         return loteProcesoRepository.findLotesPendientesPorEstacion(estacion);
+    }
+    
+    // Obtener todos los lotes de una orden
+    public List<LoteProceso> obtenerLotesPorOrden(int idOp) {
+        return loteProcesoRepository.findByIdOp(idOp);
     }
     
     // Obtener lotes por etapa
@@ -86,64 +60,60 @@ public class LoteProcesoService {
     
     // Completar lote y transferir a siguiente estación
     public void completarLote(int idLote, int idOperario) {
-        System.out.println("=== COMPLETANDO LOTE ===");
-        System.out.println("ID Lote: " + idLote);
-        System.out.println("ID Operario: " + idOperario);
-        
         LoteProceso lote = loteProcesoRepository.findById(idLote)
             .orElseThrow(() -> new RuntimeException("Lote no encontrado"));
         
-        System.out.println("Lote encontrado - ID: " + lote.getIdLote());
-        System.out.println("Estación actual: " + lote.getEstacionActual());
-        System.out.println("Estado actual: " + lote.getEstado());
-        
         // Obtener siguiente estación
-        String siguienteEstacion = obtenerSiguienteEtapa(lote.getEstacionActual());
-        System.out.println("Siguiente estación: " + siguienteEstacion);
+        String siguienteEstacion = obtenerSiguienteEstacion(lote.getEstacionActual());
         
         if (siguienteEstacion != null) {
             // Transferir a siguiente estación
             lote.setEstacionActual(siguienteEstacion);
             lote.setEstado("EN_PROCESO");
-            System.out.println("Transfiriendo a: " + siguienteEstacion);
         } else {
             // No hay más estaciones, completar
             lote.setEstado("COMPLETADO");
             lote.setFechaFin(LocalDateTime.now());
-            System.out.println("Completando lote (última estación)");
         }
         
         lote.setOperarioResponsable(idOperario);
-        LoteProceso loteGuardado = loteProcesoRepository.save(lote);
+        loteProcesoRepository.save(lote);
         
-        System.out.println("Lote guardado - ID: " + loteGuardado.getIdLote());
-        System.out.println("Nueva estación: " + loteGuardado.getEstacionActual());
-        System.out.println("Nuevo estado: " + loteGuardado.getEstado());
-        System.out.println("=== FIN COMPLETAR LOTE ===");
+        // Verificar DESPUÉS del save si el lote se completó
+        if (siguienteEstacion == null) {
+            verificarYFinalizarOrden(lote.getIdOp());
+        }
     }
     
-    // Flujo fijo de etapas
-    private String obtenerSiguienteEtapa(String etapaActual) {
-        switch (etapaActual) {
+    // Flujo fijo de estaciones
+    private String obtenerSiguienteEstacion(String estacionActual) {
+        switch (estacionActual) {
             case "LAVADO": return "CLASIFICACION";
-            case "CLASIFICACION": return "PELADO_TROZADO";
-            case "PELADO_TROZADO": return "ESCURRIDO";
+            case "CLASIFICACION": return "PELADO";
+            case "PELADO": return "ESCURRIDO";
             case "ESCURRIDO": return "CONGELACION";
             case "CONGELACION": return "EMPAQUETADO";
-            case "EMPAQUETADO": return null;
+            case "EMPAQUETADO": return null; // Última estación
             default: return null;
         }
     }
     
-    private int obtenerOrdenEtapa(String nombreEtapa) {
-        switch (nombreEtapa) {
-            case "LAVADO": return 1;
-            case "CLASIFICACION": return 2;
-            case "PELADO": return 3;
-            case "ESCURRIDO": return 4;
-            case "CONGELACION": return 5;
-            case "EMPAQUETADO": return 6;
-            default: return 1;
+    // Verificar si todos los lotes están completados y finalizar orden
+    private void verificarYFinalizarOrden(int idOp) {
+        System.out.println("=== VERIFICANDO ORDEN " + idOp + " ===");
+        
+        List<LoteProceso> todosLosLotes = loteProcesoRepository.findByIdOp(idOp);
+        List<LoteProceso> lotesCompletados = loteProcesoRepository.findByIdOpAndEstado(idOp, "COMPLETADO");
+        
+        System.out.println("Lotes totales: " + todosLosLotes.size());
+        System.out.println("Lotes completados: " + lotesCompletados.size());
+        
+        if (todosLosLotes.size() == lotesCompletados.size() && todosLosLotes.size() > 0) {
+            System.out.println("¡TODOS LOS LOTES COMPLETADOS! Consumiendo orden...");
+            ordenProduccionService.consumirOp(idOp, "SISTEMA_AUTOMATICO");
+            System.out.println("Orden " + idOp + " marcada como CONSUMIDA");
+        } else {
+            System.out.println("Orden aún no completa. Faltan: " + (todosLosLotes.size() - lotesCompletados.size()) + " lotes");
         }
     }
 }

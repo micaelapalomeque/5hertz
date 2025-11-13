@@ -23,4 +23,10 @@ public interface LoteProcesoRepository extends JpaRepository<LoteProceso, Intege
     // Método alternativo más simple para debug
     @Query("SELECT l FROM LoteProceso l WHERE l.estado = 'EN_PROCESO'")
     List<LoteProceso> findAllLotesPendientes();
+    
+    // Obtener lotes por orden de producción
+    List<LoteProceso> findByIdOp(int idOp);
+    
+    // Obtener lotes por orden y estado
+    List<LoteProceso> findByIdOpAndEstado(int idOp, String estado);
 }
