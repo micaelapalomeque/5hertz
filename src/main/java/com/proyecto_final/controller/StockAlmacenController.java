@@ -1,65 +1,114 @@
 package com.proyecto_final.controller;
 
 import java.util.List;
-import java.util.Optional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.proyecto_final.model.StockAlmacen;
 import com.proyecto_final.service.StockAlmacenService;
-import request.ConsultarStockRequest;
 import request.HabilitarProductoRequest;
 import request.ModificarStockRequest;
-import com.proyecto_final.model.StockAlmacen;
 
 @RestController
 @RequestMapping("/stock")
 public class StockAlmacenController {
 
-	private StockAlmacenService stockAlmacenService;
+    private final StockAlmacenService stockAlmacenService;
 
-	public StockAlmacenController(StockAlmacenService stockAlmacenService) {
-		this.stockAlmacenService = stockAlmacenService;
-	}
-	
-	@PutMapping("/habilitar-producto")
-	public void habilitarProducto(@RequestBody HabilitarProductoRequest request) {
-		stockAlmacenService.habilitarProducto(request.getIdAlmacen(), request.getSku());
-	}
-	
-	@PutMapping("/ingresar")
-	public void incrementarStock(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.ingresarMaterial(request.getSku(), request.getIdAlmacen(), request.getCantidad());
-	}
-	
-	@PutMapping("/retirar")
-	public void reducirStock(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.retirarMaterial(request.getSku(), request.getIdAlmacen(), request.getCantidad());
-	}
-	
-	@GetMapping("/consultar-almacen")
-	public List<StockAlmacen> consultarStockAlmacen(@PathVariable int idStock) {
-		return stockAlmacenService.consultarStockAlmacen(idStock);
-	}
-	
-	@GetMapping("/consultar-producto-almacen")
-	public StockAlmacen consultarStockProducto(
-	        @RequestParam String sku,
-	        @RequestParam int idAlmacen) {
-	    return stockAlmacenService.consultarStockProducto(sku, idAlmacen);
-	}
+    public StockAlmacenController(StockAlmacenService stockAlmacenService) {
+        this.stockAlmacenService = stockAlmacenService;
+    }
 
-	@GetMapping("/todos")
-	public List<StockAlmacen> listarStock() {
-		return stockAlmacenService.listarStock();
-	}
+    @PutMapping("/habilitar-producto")
+    public ResponseEntity<?> habilitarProducto(@RequestBody HabilitarProductoRequest request) {
+        boolean ok = stockAlmacenService.habilitarProducto(
+                request.getIdAlmacen(),
+                request.getSku()
+        );
 
-	@PutMapping("/actualizar-minimo")
-	public void actualizarCantidadMinima(@RequestBody ModificarStockRequest request) {
-		stockAlmacenService.modificarCantidadMinima(request.getSku(), request.getIdAlmacen(), request.getCantidad());
-	}
+        if (!ok) {
+            return ResponseEntity.badRequest()
+                    .body("No se pudo habilitar el producto. Verifica idAlmacen y sku.");
+        }
+
+        return ResponseEntity.ok("Producto habilitado correctamente.");
+    }
+
+    @PutMapping("/ingresar")
+    public ResponseEntity<?> ingresarStock(@RequestBody ModificarStockRequest request) {
+        boolean ok = stockAlmacenService.ingresarMaterial(
+                request.getSku(),
+                request.getIdAlmacen(),
+                request.getCantidad()
+        );
+
+        if (!ok) {
+            return ResponseEntity.badRequest()
+                    .body("No se pudo ingresar el stock. Verifica sku, idAlmacen y cantidad.");
+        }
+
+        return ResponseEntity.ok("Stock ingresado correctamente.");
+    }
+
+    @PutMapping("/retirar")
+    public ResponseEntity<?> retirarStock(@RequestBody ModificarStockRequest request) {
+        boolean ok = stockAlmacenService.retirarMaterial(
+                request.getSku(),
+                request.getIdAlmacen(),
+                request.getCantidad()
+        );
+
+        if (!ok) {
+            return ResponseEntity.badRequest()
+                    .body("No se pudo retirar el stock. Verifica stock disponible, sku, idAlmacen y cantidad.");
+        }
+
+        return ResponseEntity.ok("Stock retirado correctamente.");
+    }
+
+    @GetMapping("/consultar-almacen/{idAlmacen}")
+    public ResponseEntity<List<StockAlmacen>> consultarStockAlmacen(@PathVariable int idAlmacen) {
+        if (idAlmacen <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<StockAlmacen> stock = stockAlmacenService.consultarStockAlmacen(idAlmacen);
+        return ResponseEntity.ok(stock);
+    }
+
+    @GetMapping("/consultar-producto-almacen")
+    public ResponseEntity<?> consultarStockProducto(
+            @RequestParam String sku,
+            @RequestParam int idAlmacen) {
+
+        StockAlmacen registro = stockAlmacenService.consultarStockProducto(sku, idAlmacen);
+
+        if (registro == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(registro);
+    }
+
+    @GetMapping("/todos")
+    public ResponseEntity<List<StockAlmacen>> listarStock() {
+        List<StockAlmacen> stock = stockAlmacenService.listarStock();
+        return ResponseEntity.ok(stock);
+    }
+
+    @PutMapping("/actualizar-minimo")
+    public ResponseEntity<?> actualizarCantidadMinima(@RequestBody ModificarStockRequest request) {
+        boolean ok = stockAlmacenService.modificarCantidadMinima(
+                request.getSku(),
+                request.getIdAlmacen(),
+                request.getCantidad()
+        );
+
+        if (!ok) {
+            return ResponseEntity.badRequest()
+                    .body("No se pudo actualizar la cantidad minima. Verifica sku, idAlmacen y cantidad.");
+        }
+
+        return ResponseEntity.ok("Cantidad minima actualizada correctamente.");
+    }
 }
+

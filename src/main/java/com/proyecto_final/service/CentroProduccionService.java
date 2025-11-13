@@ -14,13 +14,25 @@ public class CentroProduccionService {
         this.centroProduccionRepository = centroProduccionRepository;
     }
 
-    public void crearCentro(String sucursal, String descripcion) {
+    private boolean datosInvalidos(String sucursal, String descripcion) {
+        if (sucursal == null || sucursal.isBlank()) return true;
+        if (descripcion == null || descripcion.isBlank()) return true;
+        return false;
+    }
+
+    public boolean crearCentro(String sucursal, String descripcion) {
+        if (datosInvalidos(sucursal, descripcion)) {
+            return false;
+        }
+
         CentroProduccion centro = new CentroProduccion();
         centro.setSucursal(sucursal);
         centro.setDescripcion(descripcion);
+
         centroProduccionRepository.save(centro);
+        return true;
     }
-    
+
     public List<CentroProduccion> obtenerTodos() {
         return centroProduccionRepository.findAll();
     }
