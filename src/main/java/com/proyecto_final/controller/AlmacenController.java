@@ -1,33 +1,44 @@
 package com.proyecto_final.controller;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.proyecto_final.model.Almacen;
 import com.proyecto_final.service.AlmacenService;
+
 import request.AlmacenRequest;
 
 @RestController
 @RequestMapping("/almacenes")
 public class AlmacenController {
-    
+
     private final AlmacenService almacenService;
-    
+
     public AlmacenController(AlmacenService almacenService) {
         this.almacenService = almacenService;
     }
-    
+
     @PostMapping
-    public void crearAlmacen(@RequestBody AlmacenRequest request) {
-        almacenService.crearAlmacen(request.getIdCentro(), request.getNombre(), 
-                                   request.getCapacidad(), request.getEstado());
+    public ResponseEntity<?> crearAlmacen(@RequestBody AlmacenRequest request) {
+        boolean ok = almacenService.crearAlmacen(
+                request.getIdCentro(),
+                request.getNombre(),
+                request.getCapacidad(),
+                request.getEstado()
+        );
+
+        if (!ok) {
+            return ResponseEntity.badRequest()
+                    .body("No se pudo crear el almacen. Verifica los datos enviados.");
+        }
+
+        return ResponseEntity.ok("Almacen creado correctamente.");
     }
-    
+
     @GetMapping
-    public List<Almacen> obtenerTodos() {
-        return almacenService.obtenerTodos();
+    public ResponseEntity<List<Almacen>> obtenerTodos() {
+        return ResponseEntity.ok(almacenService.obtenerTodos());
     }
 }

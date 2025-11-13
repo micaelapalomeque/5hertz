@@ -2,126 +2,167 @@ package com.proyecto_final.service;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.stereotype.Service;
+
 import com.proyecto_final.model.StockAlmacen;
 import com.proyecto_final.repository.StockAlmacenRepository;
-import com.proyecto_final.service.MovimientoStockService;
 
 @Service
 public class StockAlmacenService {
-	private MovimientoStockService movimientoStockService;
-	private StockAlmacenRepository stockAlmacenRepository;
-	
-	public StockAlmacenService(MovimientoStockService movimientoStockService, StockAlmacenRepository stockAlmacenRepository) {
-		this.movimientoStockService = movimientoStockService;
-		this.stockAlmacenRepository = stockAlmacenRepository;
-	}
-	
-	private boolean estaProductoHabilitado(String sku, int idAlmacen) {
-		return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).isPresent();
-	}
-	
-	public StockAlmacen consultarStockProducto(String sku, int idAlmacen) {
-		if(estaProductoHabilitado(sku, idAlmacen)) {
-			return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen).get();
-		}
-		return null;
-	}
-	
-	public List<StockAlmacen> consultarStockAlmacen(int idAlmacen) {
-		return stockAlmacenRepository.findByIdAlmacen(idAlmacen);
-	}
-	
-	
+
+    private final MovimientoStockService movimientoStockService;
+    private final StockAlmacenRepository stockAlmacenRepository;
+
+    public StockAlmacenService(
+            MovimientoStockService movimientoStockService,
+            StockAlmacenRepository stockAlmacenRepository) {
+
+        this.movimientoStockService = movimientoStockService;
+        this.stockAlmacenRepository = stockAlmacenRepository;
+    }
+
+    private boolean parametrosInvalidos(String sku, int idAlmacen, int cantidad) {
+        return sku == null || sku.isBlank() || idAlmacen <= 0 || cantidad <= 0;
+    }
+
+    private Optional<StockAlmacen> obtenerRegistro(String sku, int idAlmacen) {
+        return stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen);
+    }
+
+    public StockAlmacen consultarStockProducto(String sku, int idAlmacen) {
+        if (sku == null || sku.isBlank() || idAlmacen <= 0) {
+            return null;
+        }
+
+        return obtenerRegistro(sku, idAlmacen).orElse(null);
+    }
+
+    public List<StockAlmacen> consultarStockAlmacen(int idAlmacen) {
+        return idAlmacen > 0 ? stockAlmacenRepository.findByIdAlmacen(idAlmacen) : List.of();
+    }
+
     public boolean hayStockDisponible(String sku, int idAlmacen, int cantidad) {
-    	return consultarStockProducto(sku, idAlmacen).getStockDisponible() >= cantidad;
+        if (parametrosInvalidos(sku, idAlmacen, cantidad)) return false;
+
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlmacen);
+        return opt.isPresent() && opt.get().getStockDisponible() >= cantidad;
     }
 
     public List<StockAlmacen> listarStock() {
-    	return stockAlmacenRepository.findAll();
+        return stockAlmacenRepository.findAll();
     }
 
-    public void modificarCantidadMinima(String sku, int idAlmacen, int cantidadMinima) {
-    	if(estaProductoHabilitado(sku, idAlmacen)) {
-    		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
-    		registro.setCantidadMinima(cantidadMinima);
-    		stockAlmacenRepository.save(registro);
-    	}
-    }
-    
-	public void habilitarProducto(int idAlmacen, String sku) {
-        Optional<StockAlmacen> opt = stockAlmacenRepository.findBySku(sku);        
-        
-        if (opt.isEmpty()) {
-        	 StockAlmacen nuevoStock = new StockAlmacen();
-             nuevoStock.setIdAlmacen(idAlmacen);
-             nuevoStock.setSku(sku);
-             nuevoStock.setCantidadMinima(0);
-             nuevoStock.setStockReservado(0);
-             nuevoStock.setStockDisponible(0);
-             nuevoStock.setStockTotal(0);
-             stockAlmacenRepository.save(nuevoStock);
+    public boolean modificarCantidadMinima(String sku, int idAlmacen, int cantidadMinima) {
+        if (sku == null || sku.isBlank() || idAlmacen <= 0 || cantidadMinima < 0) {
+            return false;
         }
-    }
-	
-	public void ingresarMaterial(String sku, int idAlmacen, int cantidad) {
-		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
-			registro.setStockDisponible(registro.getStockDisponible() + cantidad);
-			registro.setStockTotal(registro.getStockTotal() + cantidad);
-			stockAlmacenRepository.save(registro);
-			movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "INGRESO");
-		}
-	}
-	
-	public void retirarMaterial(String sku, int idAlmacen, int cantidad) {
-		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
-			if(cantidad <= registro.getStockTotal()) {
-				registro.setStockTotal(registro.getStockTotal() - cantidad);
-				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
-				stockAlmacenRepository.save(registro);
-				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "RETIRO");
-			}
-		}
-	}
-	
-	public void reservarMaterial(String sku, int idAlmacen, int cantidad) {
-		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
-			if(cantidad <= registro.getStockDisponible()) {
-				registro.setStockReservado(registro.getStockReservado() + cantidad);
-				registro.setStockDisponible(registro.getStockDisponible() - cantidad);
-				stockAlmacenRepository.save(registro);
-				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "RESERVA");
-			}
-		}
-	}
-	
-	public void liberarMaterial(String sku, int idAlmacen, int cantidad) {
-		if(estaProductoHabilitado(sku, idAlmacen)) {
-			StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
-			if(cantidad <= registro.getStockReservado()) {
-				registro.setStockReservado(registro.getStockReservado() - cantidad);
-				registro.setStockDisponible(registro.getStockDisponible() + cantidad);
-				stockAlmacenRepository.save(registro);
-				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "LIBERACION");
-			}
-		}
-	}
-	
-    public void consumirMaterial(String sku, int idAlmacen, int cantidad, String tipoConsumicion) {
-    	if(estaProductoHabilitado(sku, idAlmacen)) {
-    		StockAlmacen registro = consultarStockProducto(sku, idAlmacen);
-    		if(cantidad <= registro.getStockReservado()) {
-    			registro.setStockTotal(registro.getStockTotal() - cantidad);
-    			registro.setStockDisponible(registro.getStockDisponible() - cantidad);
-    			registro.setStockReservado(registro.getStockReservado() - cantidad);
-    			stockAlmacenRepository.save(registro);
-				movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, tipoConsumicion);
-    		}
-    	}
-    }
-    
 
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlmacen);
+        if (opt.isEmpty()) return false;
+
+        StockAlmacen stock = opt.get();
+        stock.setCantidadMinima(cantidadMinima);
+        stockAlmacenRepository.save(stock);
+        return true;
+    }
+
+    public boolean habilitarProducto(int idAlmacen, String sku) {
+        if (sku == null || sku.isBlank() || idAlmacen <= 0) {
+            return false;
+        }
+
+        Optional<StockAlmacen> existente = stockAlmacenRepository.findBySku(sku);
+        if (existente.isPresent()) return false;
+
+        StockAlmacen nuevo = new StockAlmacen(idAlmacen, sku, 0, 0, 0, 0);
+        stockAlmacenRepository.save(nuevo);
+
+        return true;
+    }
+
+    public boolean ingresarMaterial(String sku, int idAlmacen, int cantidad) {
+        if (parametrosInvalidos(sku, idAlmacen, cantidad)) return false;
+
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlmacen);
+        if (opt.isEmpty()) return false;
+
+        StockAlmacen stock = opt.get();
+        stock.setStockDisponible(stock.getStockDisponible() + cantidad);
+        stock.setStockTotal(stock.getStockTotal() + cantidad);
+        stockAlmacenRepository.save(stock);
+
+        movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "INGRESO");
+        return true;
+    }
+
+    public boolean retirarMaterial(String sku, int idAlmacen, int cantidad) {
+        if (parametrosInvalidos(sku, idAlmacen, cantidad)) return false;
+
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlmacen);
+        if (opt.isEmpty()) return false;
+
+        StockAlmacen stock = opt.get();
+        if (cantidad > stock.getStockTotal()) return false;
+
+        stock.setStockTotal(stock.getStockTotal() - cantidad);
+        stock.setStockDisponible(stock.getStockDisponible() - cantidad);
+        stockAlmacenRepository.save(stock);
+
+        movimientoStockService.registrarMovimiento(idAlmacen, sku, cantidad, "RETIRO");
+        return true;
+    }
+
+    public boolean reservarMaterial(String sku, int idAlacen, int cantidad) {
+        if (parametrosInvalidos(sku, idAlacen, cantidad)) return false;
+
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlacen);
+        if (opt.isEmpty()) return false;
+
+        StockAlmacen stock = opt.get();
+        if (cantidad > stock.getStockDisponible()) return false;
+
+        stock.setStockReservado(stock.getStockReservado() + cantidad);
+        stock.setStockDisponible(stock.getStockDisponible() - cantidad);
+        stockAlmacenRepository.save(stock);
+
+        movimientoStockService.registrarMovimiento(idAlacen, sku, cantidad, "RESERVA");
+        return true;
+    }
+
+    public boolean liberarMaterial(String sku, int idAlacen, int cantidad) {
+        if (parametrosInvalidos(sku, idAlacen, cantidad)) return false;
+
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlacen);
+        if (opt.isEmpty()) return false;
+
+        StockAlmacen stock = opt.get();
+        if (cantidad > stock.getStockReservado()) return false;
+
+        stock.setStockReservado(stock.getStockReservado() - cantidad);
+        stock.setStockDisponible(stock.getStockDisponible() + cantidad);
+        stockAlmacenRepository.save(stock);
+
+        movimientoStockService.registrarMovimiento(idAlacen, sku, cantidad, "LIBERACION");
+        return true;
+    }
+
+    public boolean consumirMaterial(String sku, int idAlacen, int cantidad, String tipoConsumicion) {
+        if (parametrosInvalidos(sku, idAlacen, cantidad)) return false;
+        if (tipoConsumicion == null || tipoConsumicion.isBlank()) return false;
+
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlacen);
+        if (opt.isEmpty()) return false;
+
+        StockAlmacen stock = opt.get();
+        if (cantidad > stock.getStockReservado()) return false;
+
+        stock.setStockTotal(stock.getStockTotal() - cantidad);
+        stock.setStockDisponible(stock.getStockDisponible() - cantidad);
+        stock.setStockReservado(stock.getStockReservado() - cantidad);
+        stockAlmacenRepository.save(stock);
+
+        movimientoStockService.registrarMovimiento(idAlacen, sku, cantidad, tipoConsumicion);
+        return true;
+    }
 }

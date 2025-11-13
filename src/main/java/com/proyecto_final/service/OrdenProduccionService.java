@@ -2,274 +2,308 @@ package com.proyecto_final.service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import com.proyecto_final.repository.OrdenProduccionRepository;
-import com.proyecto_final.model.OrdenProduccion;
-import com.proyecto_final.model.MaterialPorOp;
 import com.proyecto_final.model.Bom;
 import com.proyecto_final.model.ConfigProduccion;
+import com.proyecto_final.model.OrdenProduccion;
+import com.proyecto_final.repository.OrdenProduccionRepository;
 
 @Service
 public class OrdenProduccionService {
-	
-	private CambioOpService cambioOpService;
-	private StockAlmacenService stockAlmacenService;
-	private MaterialPorOpService reservaMaterialService;
-	private BomService bomService;
-	private LoteProcesoService loteProcesoService;
-	private ConfigProduccionService configProduccionService;
-	private OrdenProduccionRepository ordenProduccionRepository;
 
-	public OrdenProduccionService(OrdenProduccionRepository ordenProduccionRepository, 
-			CambioOpService cambioOpService, StockAlmacenService stockAlmacenService, BomService bomService, 
-			MaterialPorOpService reservaMaterialService, LoteProcesoService loteProcesoService,
-			ConfigProduccionService configProduccionService) {
-		this.ordenProduccionRepository = ordenProduccionRepository;
-		this.reservaMaterialService = reservaMaterialService;
-		this.cambioOpService = cambioOpService;
-		this.stockAlmacenService = stockAlmacenService;
-		this.bomService = bomService;
-		this.loteProcesoService = loteProcesoService;
-		this.configProduccionService = configProduccionService;
-	}
+    private final CambioOpService cambioOpService;
+    private final StockAlmacenService stockAlmacenService;
+    private final MaterialPorOpService materialPorOpService;
+    private final BomService bomService;
+    private final LoteProcesoService loteProcesoService;
+    private final ConfigProduccionService configProduccionService;
+    private final OrdenProduccionRepository ordenProduccionRepository;
 
-	public void crearOp(int idAlmacen, String sku, int cantidad, String responsable) {
-		OrdenProduccion op = new OrdenProduccion(idAlmacen, sku, cantidad, "planificada", responsable);
-		ordenProduccionRepository.save(op);
-		cambioOpService.registrarCambio(op.getIdOp(), "planificada", responsable);
-		
-	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
-	    
-	    for (Bom bom : listaMateriales) {
-	        reservaMaterialService.registrarReserva(op.getIdOp(), bom.getSkuMaterial(), 0);
-	    }
-	}
-	
-	public Optional<OrdenProduccion> consultarOp(int idOp) {
-		return ordenProduccionRepository.findById(idOp);
-	}
-	
-	public List<OrdenProduccion> consultarTodas() {
-		return ordenProduccionRepository.findAll();
-	}
-	
-	public boolean hayStockParaFabricar(int idAlmacen, String skuProductoFinal, int cantidad) {
-		List<Bom> listaMateriales = bomService.obtenerListaMateriales(skuProductoFinal);
-		for(Bom bom : listaMateriales) {
-			if(!stockAlmacenService.hayStockDisponible(bom.getSkuMaterial(), idAlmacen, bom.getCanPorUnidad() * cantidad)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	public HashMap<String, Integer> calcularRecursosParaFabricar(String skuProductoFinal, int cantidad) {
-		List<Bom> listaMateriales = bomService.obtenerListaMateriales(skuProductoFinal);	
-		HashMap<String, Integer> cantidadPorMaterial = new HashMap<String, Integer>();
-		for(Bom material : listaMateriales) {
-			cantidadPorMaterial.put(material.getSkuMaterial(), material.getCanPorUnidad() * cantidad);
-		}
-		return cantidadPorMaterial;
-	}
+    public OrdenProduccionService(
+            OrdenProduccionRepository ordenProduccionRepository,
+            CambioOpService cambioOpService,
+            StockAlmacenService stockAlmacenService,
+            BomService bomService,
+            MaterialPorOpService materialPorOpService,
+            LoteProcesoService loteProcesoService,
+            ConfigProduccionService configProduccionService) {
 
-	public void activarOp(int idOp, String responsable) {
-	    System.out.println("=== ACTIVANDO ORDEN " + idOp + " ===");
-	    Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    
-	    if (opt.isEmpty()) {
-	        System.out.println("ERROR: Orden no encontrada");
-	        return;
-	    }
+        this.ordenProduccionRepository = ordenProduccionRepository;
+        this.cambioOpService = cambioOpService;
+        this.stockAlmacenService = stockAlmacenService;
+        this.bomService = bomService;
+        this.materialPorOpService = materialPorOpService;
+        this.loteProcesoService = loteProcesoService;
+        this.configProduccionService = configProduccionService;
+    }
 
-	    OrdenProduccion op = opt.get();
-	    System.out.println("Estado actual: " + op.getEstado());
-	    
-	    if (!op.getEstado().equals("planificada")) {
-	        System.out.println("ERROR: Estado no es planificada");
-	        return;
-	    }
-	    
-	    if (!hayStockParaFabricar(op.getIdAlmacen(), op.getSku(), op.getCantidad())) {
-	        System.out.println("ERROR: No hay stock suficiente");
-	        return;
-	    }
-	    
-	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
-	    System.out.println("Materiales encontrados: " + listaMateriales.size());
-	    
-	    for (Bom bom : listaMateriales) {
-	        stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), op.getCantidad() * bom.getCanPorUnidad());
-	        reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), op.getCantidad() * bom.getCanPorUnidad());
-	        reservaMaterialService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), op.getCantidad() * bom.getCanPorUnidad());
-	    }
-	    
-	    op.setEstado("activa");
-	    ordenProduccionRepository.save(op);
-	    cambioOpService.registrarCambio(idOp, "activa", responsable);
-	    // Crear lotes iniciales usando configuración
-	    ConfigProduccion config = configProduccionService.obtenerConfiguracion();
-	    int tamanoLote = op.getCantidad() / config.getNumeroLotesFijo();
-	    System.out.println("Creando lotes: cantidad=" + op.getCantidad() + ", tamano=" + tamanoLote);
-	    loteProcesoService.crearLotesIniciales(idOp, op.getCantidad(), tamanoLote);
-	    System.out.println("=== FIN ACTIVACIÓN ===");
-	}
-	
-	// Método simple solo para cambiar estado (sin reservas ni lotes)
-	public void activarOpSimple(int idOp, String responsable) {
-	    System.out.println("=== ACTIVACIÓN SIMPLE ORDEN " + idOp + " ===");
-	    Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    
-	    if (opt.isEmpty()) {
-	        System.out.println("ERROR: Orden no encontrada");
-	        return;
-	    }
+    private boolean datosInvalidosOp(int idAlmacen, String sku, int cantidad, String responsable) {
+        if (idAlmacen <= 0) return true;
+        if (sku == null || sku.isBlank()) return true;
+        if (cantidad <= 0) return true;
+        if (responsable == null || responsable.isBlank()) return true;
+        return false;
+    }
 
-	    OrdenProduccion op = opt.get();
-	    System.out.println("Estado actual: " + op.getEstado());
-	    
-	    op.setEstado("activa");
-	    ordenProduccionRepository.save(op);
-	    cambioOpService.registrarCambio(idOp, "activa", responsable);
-	    System.out.println("Estado cambiado a activa");
-	}
-	
-	// Cambiar estado rápidamente sin procesos pesados
-	public void cambiarEstadoRapido(int idOp, String nuevoEstado, String responsable) {
-	    Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    if (opt.isPresent()) {
-	        OrdenProduccion op = opt.get();
-	        op.setEstado(nuevoEstado);
-	        ordenProduccionRepository.save(op);
-	        cambioOpService.registrarCambio(idOp, nuevoEstado, responsable);
-	    }
-	}
-	
-	// Procesar reservas y lotes (proceso pesado)
-	public void procesarReservasYLotes(int idOp, String responsable) {
-	    System.out.println("=== PROCESANDO RESERVAS Y LOTES PARA ORDEN " + idOp + " ===");
-	    Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    if (opt.isEmpty()) {
-	        System.out.println("ERROR: Orden no encontrada en proceso asíncrono");
-	        return;
-	    }
-	    
-	    OrdenProduccion op = opt.get();
-	    System.out.println("Procesando orden: " + op.getSku() + ", cantidad: " + op.getCantidad());
-	    
-	    // Reservar materiales
-	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
-	    System.out.println("Materiales a reservar: " + listaMateriales.size());
-	    
-	    for (Bom bom : listaMateriales) {
-	        stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), op.getCantidad() * bom.getCanPorUnidad());
-	        reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), op.getCantidad() * bom.getCanPorUnidad());
-	        reservaMaterialService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), op.getCantidad() * bom.getCanPorUnidad());
-	        System.out.println("Material reservado: " + bom.getSkuMaterial());
-	    }
-	    
-	    // Crear lotes
-	    System.out.println("=== CREANDO LOTES ===");
-	    ConfigProduccion config = configProduccionService.obtenerConfiguracion();
-	    int tamanoLote = op.getCantidad() / config.getNumeroLotesFijo();
-	    System.out.println("Configuración: cantidad=" + op.getCantidad() + ", lotes=" + config.getNumeroLotesFijo() + ", tamaño=" + tamanoLote);
-	    
-	    loteProcesoService.crearLotesIniciales(idOp, op.getCantidad(), tamanoLote);
-	    System.out.println("=== FIN PROCESO ASÍNCRONO ===");
-	}
-	
-	public void consumirOp(int idOp, String responsable) {
-		Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    
-	    if (opt.isEmpty()) return;
+    private Optional<OrdenProduccion> obtenerOp(int idOp) {
+        if (idOp <= 0) return Optional.empty();
+        return ordenProduccionRepository.findById(idOp);
+    }
 
-	    OrdenProduccion op = opt.get();
-	    
-	    if(!op.getEstado().equals("activa")) {
-	    	return;
-	    }
-	    
-	    // Consumir definitivamente los materiales reservados
-	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
-	    
-	    for(Bom bom : listaMateriales) {
-	    	int cantidadReservada = reservaMaterialService.consultarMaterialReservado(idOp, bom.getSkuMaterial());
-	    	stockAlmacenService.consumirMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidadReservada, "CONSUMO_PRODUCCION");
-	    	reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), 0);
-	    	reservaMaterialService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), 0);
-	    }
-	    
-	    op.setEstado("consumida");
-    	ordenProduccionRepository.save(op);
-    	cambioOpService.registrarCambio(idOp, "consumida", responsable);
-	}
-	
-	public void pausarOp(int idOp, String responsable) {
-		Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    
-	    if (opt.isEmpty()) return;
+    private boolean esEstado(OrdenProduccion op, String estado) {
+        return estado != null && estado.equalsIgnoreCase(op.getEstado());
+    }
 
-	    OrdenProduccion op = opt.get();
-	    
-	    if(!op.getEstado().equals("activa") && !op.getEstado().equals("reanudada")) {
-	    	return;
-	    }
-	    
-	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
-	    
-	    for(Bom bom : listaMateriales) {
-	    	int cantidadAliberar = reservaMaterialService.consultarDiferencia(idOp, bom.getSkuMaterial());
-	    	stockAlmacenService.liberarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidadAliberar);
-	    	reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), 0);
-	    }
-	    
-	    op.setEstado("pausada");
-    	ordenProduccionRepository.save(op);
-    	cambioOpService.registrarCambio(idOp, "pausada", responsable);
-	}
-	
-	public void reanudarOp(int idOp, String responsable) {
-		Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    
-	    if (opt.isEmpty()) return;
+    public boolean crearOp(int idAlmacen, String sku, int cantidad, String responsable) {
+        if (datosInvalidosOp(idAlmacen, sku, cantidad, responsable)) {
+            return false;
+        }
 
-	    OrdenProduccion op = opt.get();
-	    
-	    if (!op.getEstado().equals("pausada")) return;
-	    if (!hayStockParaFabricar(op.getIdAlmacen(), op.getSku(), op.getCantidad())) return;
-	    
-	    List<Bom> listaMateriales = bomService.obtenerListaMateriales(op.getSku());
-	    
-	    for (Bom bom : listaMateriales) {
-	    	int cantidadPendiente = reservaMaterialService.consultarCantidadPendiente(idOp, bom.getSkuMaterial());
-	    	stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidadPendiente);
-	    	reservaMaterialService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), cantidadPendiente);
-	    }
-	    
-	    op.setEstado("reanudada");
-    	ordenProduccionRepository.save(op);
-    	cambioOpService.registrarCambio(idOp, "reanudada", responsable);    
-	}
-	
-	public void cancelarOp(int idOp, String responsable) {
-		Optional<OrdenProduccion> opt = consultarOp(idOp);
-	    
-	    if (opt.isEmpty()) return;
+        OrdenProduccion op = new OrdenProduccion(idAlmacen, sku, cantidad, "planificada", responsable);
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(op.getIdOp(), "planificada", responsable);
 
-	    OrdenProduccion op = opt.get();
-	    
-	    if(op.getEstado().equals("consumida") || op.getEstado().equals("cancelada")) {
-	    	return;
-	    }
-	    
-	    if(!op.getEstado().equals("pausada")) {
-	    	pausarOp(idOp, responsable);
-	    }	
-	     
-	    op.setEstado("cancelada");
-    	ordenProduccionRepository.save(op);
-    	cambioOpService.registrarCambio(idOp, "cancelada", responsable);
-	}
-	
+        List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
+        for (Bom bom : materiales) {
+            materialPorOpService.registrarReserva(op.getIdOp(), bom.getSkuMaterial(), 0);
+        }
 
+        return true;
+    }
+
+    public Optional<OrdenProduccion> consultarOp(int idOp) {
+        return obtenerOp(idOp);
+    }
+
+    public List<OrdenProduccion> consultarTodas() {
+        return ordenProduccionRepository.findAll();
+    }
+
+    public boolean hayStockParaFabricar(int idAlmacen, String skuProductoFinal, int cantidad) {
+        if (idAlmacen <= 0 || skuProductoFinal == null || skuProductoFinal.isBlank() || cantidad <= 0) {
+            return false;
+        }
+
+        List<Bom> materiales = bomService.obtenerListaMateriales(skuProductoFinal);
+        for (Bom bom : materiales) {
+            int cantidadNecesaria = bom.getCanPorUnidad() * cantidad;
+            boolean hayStock = stockAlmacenService.hayStockDisponible(bom.getSkuMaterial(), idAlmacen, cantidadNecesaria);
+            if (!hayStock) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public Map<String, Integer> calcularRecursosParaFabricar(String skuProductoFinal, int cantidad) {
+        if (skuProductoFinal == null || skuProductoFinal.isBlank() || cantidad <= 0) {
+            return Map.of();
+        }
+
+        List<Bom> materiales = bomService.obtenerListaMateriales(skuProductoFinal);
+        Map<String, Integer> cantidadPorMaterial = new HashMap<>();
+
+        for (Bom material : materiales) {
+            int total = material.getCanPorUnidad() * cantidad;
+            cantidadPorMaterial.put(material.getSkuMaterial(), total);
+        }
+
+        return cantidadPorMaterial;
+    }
+
+    public boolean activarOp(int idOp, String responsable) {
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+
+        OrdenProduccion op = opt.get();
+        if (!esEstado(op, "planificada")) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        boolean hayStock = hayStockParaFabricar(op.getIdAlmacen(), op.getSku(), op.getCantidad());
+        if (!hayStock) return false;
+
+        List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
+        for (Bom bom : materiales) {
+            int cantidad = op.getCantidad() * bom.getCanPorUnidad();
+            stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidad);
+            materialPorOpService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), cantidad);
+            materialPorOpService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), cantidad);
+        }
+
+        op.setEstado("activa");
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(idOp, "activa", responsable);
+
+        ConfigProduccion config = configProduccionService.obtenerConfiguracion();
+        if (config != null && config.getNumeroLotesFijo() > 0) {
+            int tamanoLote = op.getCantidad() / config.getNumeroLotesFijo();
+            if (tamanoLote <= 0) {
+                tamanoLote = op.getCantidad();
+            }
+            loteProcesoService.crearLotesIniciales(idOp, op.getCantidad(), tamanoLote);
+        }
+
+        return true;
+    }
+
+    public boolean activarOpSimple(int idOp, String responsable) {
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        OrdenProduccion op = opt.get();
+        op.setEstado("activa");
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(idOp, "activa", responsable);
+
+        return true;
+    }
+
+    public boolean cambiarEstadoRapido(int idOp, String nuevoEstado, String responsable) {
+        if (nuevoEstado == null || nuevoEstado.isBlank()) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+
+        OrdenProduccion op = opt.get();
+        op.setEstado(nuevoEstado);
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(idOp, nuevoEstado, responsable);
+
+        return true;
+    }
+
+    public boolean procesarReservasYLotes(int idOp, String responsable) {
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        OrdenProduccion op = opt.get();
+
+        List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
+        for (Bom bom : materiales) {
+            int cantidad = op.getCantidad() * bom.getCanPorUnidad();
+            stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidad);
+            materialPorOpService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), cantidad);
+            materialPorOpService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), cantidad);
+        }
+
+        ConfigProduccion config = configProduccionService.obtenerConfiguracion();
+        if (config != null && config.getNumeroLotesFijo() > 0) {
+            int tamanoLote = op.getCantidad() / config.getNumeroLotesFijo();
+            if (tamanoLote <= 0) {
+                tamanoLote = op.getCantidad();
+            }
+            loteProcesoService.crearLotesIniciales(idOp, op.getCantidad(), tamanoLote);
+        }
+
+        return true;
+    }
+
+    public boolean consumirOp(int idOp, String responsable) {
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        OrdenProduccion op = opt.get();
+        if (!esEstado(op, "activa") && !esEstado(op, "reanudada")) return false;
+
+        List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
+        for (Bom bom : materiales) {
+            int cantidadReservada = materialPorOpService.consultarMaterialReservado(idOp, bom.getSkuMaterial());
+            if (cantidadReservada > 0) {
+                stockAlmacenService.consumirMaterial(
+                        bom.getSkuMaterial(),
+                        op.getIdAlmacen(),
+                        cantidadReservada,
+                        "CONSUMO_PRODUCCION"
+                );
+                materialPorOpService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), 0);
+                materialPorOpService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), 0);
+            }
+        }
+
+        op.setEstado("consumida");
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(idOp, "consumida", responsable);
+
+        return true;
+    }
+
+    public boolean pausarOp(int idOp, String responsable) {
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        OrdenProduccion op = opt.get();
+        if (!esEstado(op, "activa") && !esEstado(op, "reanudada")) return false;
+
+        List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
+        for (Bom bom : materiales) {
+            int cantidadALiberar = materialPorOpService.consultarDiferencia(idOp, bom.getSkuMaterial());
+            if (cantidadALiberar > 0) {
+                stockAlmacenService.liberarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidadALiberar);
+                materialPorOpService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), 0);
+            }
+        }
+
+        op.setEstado("pausada");
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(idOp, "pausada", responsable);
+
+        return true;
+    }
+
+    public boolean reanudarOp(int idOp, String responsable) {
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        OrdenProduccion op = opt.get();
+        if (!esEstado(op, "pausada")) return false;
+
+        boolean hayStock = hayStockParaFabricar(op.getIdAlmacen(), op.getSku(), op.getCantidad());
+        if (!hayStock) return false;
+
+        List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
+        for (Bom bom : materiales) {
+            int cantidadPendiente = materialPorOpService.consultarCantidadPendiente(idOp, bom.getSkuMaterial());
+            if (cantidadPendiente > 0) {
+                stockAlmacenService.reservarMaterial(bom.getSkuMaterial(), op.getIdAlmacen(), cantidadPendiente);
+                materialPorOpService.modificarCantidadReservada(idOp, bom.getSkuMaterial(), cantidadPendiente);
+            }
+        }
+
+        op.setEstado("reanudada");
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(idOp, "reanudada", responsable);
+
+        return true;
+    }
+
+    public boolean cancelarOp(int idOp, String responsable) {
+        Optional<OrdenProduccion> opt = obtenerOp(idOp);
+        if (opt.isEmpty()) return false;
+        if (responsable == null || responsable.isBlank()) return false;
+
+        OrdenProduccion op = opt.get();
+
+        if (esEstado(op, "consumida") || esEstado(op, "cancelada")) {
+            return false;
+        }
+
+        if (!esEstado(op, "pausada")) {
+            pausarOp(idOp, responsable);
+        }
+
+        op.setEstado("cancelada");
+        ordenProduccionRepository.save(op);
+        cambioOpService.registrarCambio(idOp, "cancelada", responsable);
+
+        return true;
+    }
 }
