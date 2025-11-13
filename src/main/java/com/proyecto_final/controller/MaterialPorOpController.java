@@ -7,15 +7,18 @@ import org.springframework.web.bind.annotation.*;
 
 import com.proyecto_final.model.MaterialPorOp;
 import com.proyecto_final.service.MaterialPorOpService;
+import com.proyecto_final.service.MaterialPorOrdenService;
 
 @RestController
 @RequestMapping("/material-op")
 public class MaterialPorOpController {
 
     private final MaterialPorOpService materialPorOpService;
+    private final MaterialPorOrdenService materialPorOrdenService;
 
-    public MaterialPorOpController(MaterialPorOpService materialPorOpService) {
+    public MaterialPorOpController(MaterialPorOpService materialPorOpService, MaterialPorOrdenService materialPorOrdenService) {
         this.materialPorOpService = materialPorOpService;
+        this.materialPorOrdenService = materialPorOrdenService;
     }
 
     @GetMapping
@@ -150,5 +153,69 @@ public class MaterialPorOpController {
         }
 
         return ResponseEntity.ok("Cantidad pendiente modificada correctamente.");
+    }
+
+    public static class RegistrarDesperdicioRequest {
+        private int idOp;
+        private String sku;
+        private int cantidadDesperdiciada;
+        private String motivo;
+        private String observaciones;
+        private String estacion;
+        private String operario;
+
+        // Getters y setters
+        public int getIdOp() { return idOp; }
+        public void setIdOp(int idOp) { this.idOp = idOp; }
+        public String getSku() { return sku; }
+        public void setSku(String sku) { this.sku = sku; }
+        public int getCantidadDesperdiciada() { return cantidadDesperdiciada; }
+        public void setCantidadDesperdiciada(int cantidadDesperdiciada) { this.cantidadDesperdiciada = cantidadDesperdiciada; }
+        public String getMotivo() { return motivo; }
+        public void setMotivo(String motivo) { this.motivo = motivo; }
+        public String getObservaciones() { return observaciones; }
+        public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
+        public String getEstacion() { return estacion; }
+        public void setEstacion(String estacion) { this.estacion = estacion; }
+        public String getOperario() { return operario; }
+        public void setOperario(String operario) { this.operario = operario; }
+    }
+
+    @PutMapping("/registrar-desperdicio")
+    public ResponseEntity<?> registrarDesperdicio(@RequestBody RegistrarDesperdicioRequest request) {
+        if (request.getIdOp() <= 0 || request.getSku() == null || request.getSku().isBlank() || request.getCantidadDesperdiciada() <= 0) {
+            return ResponseEntity.badRequest().body("Datos inválidos: idOp > 0, sku no vacío y cantidadDesperdiciada > 0");
+        }
+
+        try {
+            boolean ok = materialPorOrdenService.registrarDesperdicio(request.getIdOp(), request.getSku(), request.getCantidadDesperdiciada());
+            
+            if (!ok) {
+                return ResponseEntity.badRequest().body("No se pudo registrar el desperdicio. Verifica que no supere la cantidad reservada disponible.");
+            }
+            
+            return ResponseEntity.ok("Desperdicio registrado correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al registrar desperdicio: " + e.getMessage());
+        }
+    }
+    
+    @PutMapping("/consumir-material")
+    public ResponseEntity<?> consumirMaterial(@RequestBody RegistrarDesperdicioRequest request) {
+        if (request.getIdOp() <= 0 || request.getSku() == null || request.getSku().isBlank() || request.getCantidadDesperdiciada() <= 0) {
+            return ResponseEntity.badRequest().body("Datos inválidos: idOp > 0, sku no vacío y cantidad > 0");
+        }
+
+        try {
+            boolean ok = materialPorOrdenService.consumirMaterial(request.getIdOp(), request.getSku(), request.getCantidadDesperdiciada());
+            
+            if (!ok) {
+                return ResponseEntity.badRequest().body("No se pudo consumir el material. Verifica la cantidad disponible.");
+            }
+            
+            return ResponseEntity.ok("Material consumido correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al consumir material: " + e.getMessage());
+        }
     }
 }

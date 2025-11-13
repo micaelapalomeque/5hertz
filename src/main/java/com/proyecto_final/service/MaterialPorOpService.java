@@ -59,9 +59,9 @@ public class MaterialPorOpService {
     }
 
     public boolean registrarReserva(int idOp, String sku, int cantidadReservada) {
-        if (datosInvalidos(idOp, sku, cantidadReservada)) return false;
-        if (cantidadReservada == 0) return false;
-
+        if (idOp <= 0 || sku == null || sku.isBlank() || cantidadReservada < 0) return false;
+        // Permitir cantidad 0 para registros iniciales
+        
         MaterialPorOp reserva = new MaterialPorOp(idOp, sku, cantidadReservada);
         materialPorOpRepository.save(reserva);
 

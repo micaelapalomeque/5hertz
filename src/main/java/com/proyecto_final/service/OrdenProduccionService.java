@@ -9,6 +9,7 @@ import com.proyecto_final.model.Bom;
 import com.proyecto_final.model.ConfigProduccion;
 import com.proyecto_final.model.OrdenProduccion;
 import com.proyecto_final.repository.OrdenProduccionRepository;
+import com.proyecto_final.service.MaterialPorOrdenService;
 
 @Service
 public class OrdenProduccionService {
@@ -16,6 +17,7 @@ public class OrdenProduccionService {
     private final CambioOpService cambioOpService;
     private final StockAlmacenService stockAlmacenService;
     private final MaterialPorOpService materialPorOpService;
+    private final MaterialPorOrdenService materialPorOrdenService;
     private final BomService bomService;
     private final LoteProcesoService loteProcesoService;
     private final ConfigProduccionService configProduccionService;
@@ -27,6 +29,7 @@ public class OrdenProduccionService {
             StockAlmacenService stockAlmacenService,
             BomService bomService,
             MaterialPorOpService materialPorOpService,
+            MaterialPorOrdenService materialPorOrdenService,
             LoteProcesoService loteProcesoService,
             ConfigProduccionService configProduccionService) {
 
@@ -35,6 +38,7 @@ public class OrdenProduccionService {
         this.stockAlmacenService = stockAlmacenService;
         this.bomService = bomService;
         this.materialPorOpService = materialPorOpService;
+        this.materialPorOrdenService = materialPorOrdenService;
         this.loteProcesoService = loteProcesoService;
         this.configProduccionService = configProduccionService;
     }
@@ -67,7 +71,11 @@ public class OrdenProduccionService {
 
         List<Bom> materiales = bomService.obtenerListaMateriales(op.getSku());
         for (Bom bom : materiales) {
+            // Crear registro en reserva_material (para reservas de stock)
             materialPorOpService.registrarReserva(op.getIdOp(), bom.getSkuMaterial(), 0);
+            // Crear registro en material_por_op (para desperdicio) - usar cantidad calculada
+            int cantidadNecesaria = op.getCantidad() * bom.getCanPorUnidad();
+            materialPorOrdenService.crearRegistroInicial(op.getIdOp(), bom.getSkuMaterial(), cantidadNecesaria);
         }
 
         return true;
@@ -302,6 +310,9 @@ public class OrdenProduccionService {
 
         // Cancelar todos los lotes de esta orden
         loteProcesoService.cancelarLotesPorOrden(idOp);
+        
+        // Liberar materiales de material_por_op (eliminar registros)
+        materialPorOrdenService.liberarMaterialesPorOrden(idOp);
 
         op.setEstado("cancelada");
         ordenProduccionRepository.save(op);
