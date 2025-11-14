@@ -1,11 +1,14 @@
 package com.proyecto_final.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.proyecto_final.model.MaterialPorOp;
+import com.proyecto_final.model.ResumenDesperdicio;
+import java.util.Optional;
 import com.proyecto_final.service.MaterialPorOpService;
 import com.proyecto_final.service.MaterialPorOrdenService;
 
@@ -160,7 +163,7 @@ public class MaterialPorOpController {
         private String sku;
         private int cantidadDesperdiciada;
         private String motivo;
-        private String observaciones;
+
         private String estacion;
         private String operario;
 
@@ -173,8 +176,7 @@ public class MaterialPorOpController {
         public void setCantidadDesperdiciada(int cantidadDesperdiciada) { this.cantidadDesperdiciada = cantidadDesperdiciada; }
         public String getMotivo() { return motivo; }
         public void setMotivo(String motivo) { this.motivo = motivo; }
-        public String getObservaciones() { return observaciones; }
-        public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
+
         public String getEstacion() { return estacion; }
         public void setEstacion(String estacion) { this.estacion = estacion; }
         public String getOperario() { return operario; }
@@ -188,15 +190,43 @@ public class MaterialPorOpController {
         }
 
         try {
-            boolean ok = materialPorOrdenService.registrarDesperdicio(request.getIdOp(), request.getSku(), request.getCantidadDesperdiciada());
+            // Registrar en todas las tablas necesarias
+            boolean ok = materialPorOrdenService.registrarDesperdicioCompleto(
+                request.getIdOp(), 
+                request.getSku(), 
+                request.getCantidadDesperdiciada(),
+                request.getMotivo(),
+                request.getEstacion(),
+                request.getOperario()
+            );
             
             if (!ok) {
-                return ResponseEntity.badRequest().body("No se pudo registrar el desperdicio. Verifica que no supere la cantidad reservada disponible.");
+                return ResponseEntity.badRequest().body("Error al registrar desperdicio");
             }
             
             return ResponseEntity.ok("Desperdicio registrado correctamente.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al registrar desperdicio: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/estadisticas-desperdicio")
+    public ResponseEntity<List<Map<String, Object>>> obtenerEstadisticasDesperdicio() {
+        try {
+            List<Map<String, Object>> estadisticas = materialPorOrdenService.obtenerEstadisticasDesperdicio();
+            return ResponseEntity.ok(estadisticas);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+    
+    @GetMapping("/top-desperdicios")
+    public ResponseEntity<List<ResumenDesperdicio>> obtenerTopDesperdicios() {
+        try {
+            List<ResumenDesperdicio> top3 = materialPorOrdenService.obtenerTop3Desperdicios();
+            return ResponseEntity.ok(top3);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
     
