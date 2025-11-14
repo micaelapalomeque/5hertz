@@ -331,8 +331,14 @@ public class MaterialPorOpController {
     public ResponseEntity<List<Map<String, Object>>> obtenerMaterialesOrden(@PathVariable int idOp) {
         try {
             List<Map<String, Object>> materiales = materialPorOrdenService.obtenerMaterialesPorOrdenDetalle(idOp);
+            System.out.println("=== MATERIALES MATERIAL_POR_OP ORDEN " + idOp + " ===");
+            System.out.println("Cantidad encontrada: " + materiales.size());
+            for (Map<String, Object> mat : materiales) {
+                System.out.println("SKU: " + mat.get("sku") + ", Reservado: " + mat.get("cantidadReservada") + ", Desperdiciado: " + mat.get("cantidadDesperdiciada"));
+            }
             return ResponseEntity.ok(materiales);
         } catch (Exception e) {
+            System.out.println("Error obteniendo materiales: " + e.getMessage());
             return ResponseEntity.badRequest().body(null);
         }
     }
