@@ -35,6 +35,11 @@ public class MaterialPorOpController {
             return ResponseEntity.badRequest().body("El id de la orden debe ser mayor a cero.");
         }
         List<MaterialPorOp> lista = materialPorOpService.consultarReservasPorOp(idOp);
+        System.out.println("=== MATERIALES PARA ORDEN " + idOp + " ===");
+        System.out.println("Cantidad de materiales encontrados: " + lista.size());
+        for (MaterialPorOp material : lista) {
+            System.out.println("SKU: " + material.getSku() + ", Reservado: " + material.getCantidadReservada() + ", Desperdiciado: " + material.getCantidadDesperdiciada());
+        }
         return ResponseEntity.ok(lista);
     }
 
@@ -319,6 +324,26 @@ public class MaterialPorOpController {
             System.out.println("EXCEPTION: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/materiales-orden/{idOp}")
+    public ResponseEntity<List<Map<String, Object>>> obtenerMaterialesOrden(@PathVariable int idOp) {
+        try {
+            List<Map<String, Object>> materiales = materialPorOrdenService.obtenerMaterialesPorOrdenDetalle(idOp);
+            return ResponseEntity.ok(materiales);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+    
+    @GetMapping("/resumen-orden/{idOp}")
+    public ResponseEntity<List<Map<String, Object>>> obtenerResumenOrden(@PathVariable int idOp) {
+        try {
+            List<Map<String, Object>> resumen = materialPorOrdenService.obtenerResumenPorOrden(idOp);
+            return ResponseEntity.ok(resumen);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
     

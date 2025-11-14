@@ -116,6 +116,59 @@ public class MaterialPorOrdenService {
         return estadisticas;
     }
     
+    public List<Map<String, Object>> obtenerResumenPorOrden(int idOp) {
+        List<Object[]> resultados = resumenDesperdicioRepository.findDetallesByIdOp(idOp);
+        List<Map<String, Object>> resumen = new java.util.ArrayList<>();
+        
+        // Agrupar por motivo y SKU para esta orden específica
+        Map<String, Integer> motivoCount = new HashMap<>();
+        Map<String, Integer> skuCount = new HashMap<>();
+        
+        for (Object[] resultado : resultados) {
+            String motivo = (String) resultado[1]; // motivo_principal
+            String sku = (String) resultado[2]; // sku_mayor_desperdicio
+            Integer gramos = (Integer) resultado[3]; // gramos_desperdiciados
+            
+            motivoCount.put(motivo, motivoCount.getOrDefault(motivo, 0) + 1);
+            skuCount.put(sku, skuCount.getOrDefault(sku, 0) + gramos);
+        }
+        
+        // Encontrar el más frecuente
+        String motivoMasFrecuente = motivoCount.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("");
+            
+        String skuMasDesperdiciado = skuCount.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("");
+        
+        Map<String, Object> resumenOrden = new HashMap<>();
+        resumenOrden.put("motivoPrincipal", motivoMasFrecuente);
+        resumenOrden.put("skuMayorDesperdicio", skuMasDesperdiciado);
+        resumen.add(resumenOrden);
+        
+        return resumen;
+    }
+    
+    public List<Map<String, Object>> obtenerMaterialesPorOrdenDetalle(int idOp) {
+        List<MaterialPorOrden> materiales = materialPorOrdenRepository.findByIdOp(idOp);
+        List<Map<String, Object>> resultado = new java.util.ArrayList<>();
+        
+        for (MaterialPorOrden material : materiales) {
+            Map<String, Object> materialMap = new HashMap<>();
+            materialMap.put("sku", material.getSku());
+            materialMap.put("cantidadReservada", material.getCantidadReservada());
+            materialMap.put("cantidadConsumida", material.getCantidadConsumida());
+            materialMap.put("cantidadDesperdiciada", material.getCantidadDesperdiciada());
+            materialMap.put("cantidadPendiente", material.getCantidadPendiente());
+            resultado.add(materialMap);
+        }
+        
+        return resultado;
+    }
+    
     public List<Map<String, Object>> obtenerReporteOrdenes() {
         // Obtener todas las órdenes activas/terminadas con sus desperdicios
         List<Object[]> resultados = materialPorOrdenRepository.findOrdenesConDesperdicio();

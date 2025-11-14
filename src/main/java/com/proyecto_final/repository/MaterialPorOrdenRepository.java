@@ -14,7 +14,7 @@ public interface MaterialPorOrdenRepository extends JpaRepository<MaterialPorOrd
     
     @Query("SELECT DISTINCT m.idOp, o.sku, o.estado, SUM(m.cantidadDesperdiciada) " +
            "FROM MaterialPorOrden m JOIN OrdenProduccion o ON m.idOp = o.idOp " +
-           "WHERE o.estado IN ('ACTIVA', 'TERMINADA') " +
+           "WHERE o.estado IN ('activa', 'consumida') " +
            "GROUP BY m.idOp, o.sku, o.estado ORDER BY m.idOp DESC")
     List<Object[]> findOrdenesConDesperdicio();
     

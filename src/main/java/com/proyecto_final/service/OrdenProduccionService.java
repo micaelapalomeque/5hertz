@@ -141,9 +141,9 @@ public class OrdenProduccionService {
             materialPorOpService.modificarCantidadPendiente(idOp, bom.getSkuMaterial(), cantidad);
         }
 
-        op.setEstado("activa");
+        op.setEstado("ACTIVA");
         ordenProduccionRepository.save(op);
-        cambioOpService.registrarCambio(idOp, "activa", responsable);
+        cambioOpService.registrarCambio(idOp, "ACTIVA", responsable);
 
         ConfigProduccion config = configProduccionService.obtenerConfiguracion();
         if (config != null && config.getNumeroLotesFijo() > 0) {
@@ -163,9 +163,9 @@ public class OrdenProduccionService {
         if (responsable == null || responsable.isBlank()) return false;
 
         OrdenProduccion op = opt.get();
-        op.setEstado("activa");
+        op.setEstado("ACTIVA");
         ordenProduccionRepository.save(op);
-        cambioOpService.registrarCambio(idOp, "activa", responsable);
+        cambioOpService.registrarCambio(idOp, "ACTIVA", responsable);
 
         return true;
     }
@@ -235,9 +235,9 @@ public class OrdenProduccionService {
             }
         }
 
-        op.setEstado("consumida");
+        op.setEstado("CONSUMIDA");
         ordenProduccionRepository.save(op);
-        cambioOpService.registrarCambio(idOp, "consumida", responsable);
+        cambioOpService.registrarCambio(idOp, "CONSUMIDA", responsable);
 
         return true;
     }

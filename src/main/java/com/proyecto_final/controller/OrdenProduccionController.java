@@ -38,7 +38,12 @@ public class OrdenProduccionController {
 
     @GetMapping("/consultar/todas")
     public List<OrdenProduccion> consultarTodas() {
-        return ordenProduccionService.consultarTodas();
+        List<OrdenProduccion> ordenes = ordenProduccionService.consultarTodas();
+        System.out.println("=== ORDENES CONSULTADAS ===");
+        for (OrdenProduccion orden : ordenes) {
+            System.out.println("Orden " + orden.getIdOp() + ": estado=" + orden.getEstado());
+        }
+        return ordenes;
     }
 
     @PutMapping("/activar")

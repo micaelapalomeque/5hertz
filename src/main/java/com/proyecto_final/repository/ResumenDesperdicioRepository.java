@@ -17,4 +17,7 @@ public interface ResumenDesperdicioRepository extends JpaRepository<ResumenDespe
     
     @Query("SELECT r.motivoPrincipal, COUNT(r) FROM ResumenDesperdicio r GROUP BY r.motivoPrincipal ORDER BY COUNT(r) DESC")
     List<Object[]> findMotivosMasFrecuentesResumen();
+    
+    @Query("SELECT r.idOp, r.motivoPrincipal, r.skuMayorDesperdicio, r.gramosDesperdiciados FROM ResumenDesperdicio r WHERE r.idOp = ?1")
+    List<Object[]> findDetallesByIdOp(int idOp);
 }
