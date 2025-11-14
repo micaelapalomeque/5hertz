@@ -15,4 +15,7 @@ public interface RegistroDesperdicioRepository extends JpaRepository<RegistroDes
     
     @Query("SELECT r.motivo, COUNT(r) FROM RegistroDesperdicio r GROUP BY r.motivo ORDER BY COUNT(r) DESC")
     List<Object[]> findMotivosMasFrecuentes();
+    
+    @Query("SELECT r.sku, SUM(r.cantidadDesperdiciada) FROM RegistroDesperdicio r GROUP BY r.sku ORDER BY SUM(r.cantidadDesperdiciada) DESC")
+    List<Object[]> findSkuMasDesperdiciado();
 }

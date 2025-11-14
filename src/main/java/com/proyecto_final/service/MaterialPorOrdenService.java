@@ -60,8 +60,8 @@ public class MaterialPorOrdenService {
         RegistroDesperdicio registro = new RegistroDesperdicio(idOp, sku, cantidadDesperdiciada, motivo, "", estacion, operario);
         registroDesperdicioRepository.save(registro);
         
-        // Actualizar resumen de desperdicio
-        actualizarResumenDesperdicio(idOp);
+        // Insertar en resumen de desperdicio
+        actualizarResumenDesperdicio(idOp, sku, cantidadDesperdiciada, motivo);
         
         return true;
     }
@@ -116,50 +116,63 @@ public class MaterialPorOrdenService {
         return estadisticas;
     }
     
-    private void actualizarResumenDesperdicio(int idOp) {
-        // Obtener todos los desperdicios de esta orden
-        List<RegistroDesperdicio> desperdicios = registroDesperdicioRepository.findByIdOp(idOp);
+    public List<Map<String, Object>> obtenerReporteOrdenes() {
+        // Obtener todas las órdenes activas/terminadas con sus desperdicios
+        List<Object[]> resultados = materialPorOrdenRepository.findOrdenesConDesperdicio();
+        List<Map<String, Object>> reporte = new java.util.ArrayList<>();
         
-        if (desperdicios.isEmpty()) return;
-        
-        // Encontrar motivo más frecuente
-        Map<String, Integer> motivoCount = new HashMap<>();
-        for (RegistroDesperdicio d : desperdicios) {
-            motivoCount.put(d.getMotivo(), motivoCount.getOrDefault(d.getMotivo(), 0) + 1);
+        for (Object[] resultado : resultados) {
+            Map<String, Object> orden = new HashMap<>();
+            orden.put("idOp", resultado[0]);
+            orden.put("sku", resultado[1]);
+            orden.put("estado", resultado[2]);
+            orden.put("totalDesperdiciado", resultado[3] != null ? resultado[3] : 0);
+            reporte.add(orden);
         }
-        String motivoPrincipal = motivoCount.entrySet().stream()
-            .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey)
-            .orElse("");
         
-        // Encontrar SKU con mayor desperdicio
-        Map<String, Integer> skuDesperdicio = new HashMap<>();
-        for (RegistroDesperdicio d : desperdicios) {
-            skuDesperdicio.put(d.getSku(), skuDesperdicio.getOrDefault(d.getSku(), 0) + d.getCantidadDesperdiciada());
-        }
-        String skuMayor = skuDesperdicio.entrySet().stream()
-            .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey)
-            .orElse("");
-        int gramosMayor = skuDesperdicio.getOrDefault(skuMayor, 0);
-        
-        // Actualizar o crear resumen
-        Optional<ResumenDesperdicio> existente = resumenDesperdicioRepository.findByIdOp(idOp);
-        if (existente.isPresent()) {
-            ResumenDesperdicio resumen = existente.get();
-            resumen.setMotivoPrincipal(motivoPrincipal);
-            resumen.setSkuMayorDesperdicio(skuMayor);
-            resumen.setGramosDesperdiciados(gramosMayor);
-            resumenDesperdicioRepository.save(resumen);
-        } else {
-            ResumenDesperdicio nuevo = new ResumenDesperdicio(idOp, motivoPrincipal, skuMayor, gramosMayor);
-            resumenDesperdicioRepository.save(nuevo);
-        }
+        return reporte;
     }
     
-    public List<ResumenDesperdicio> obtenerTop3Desperdicios() {
-        List<ResumenDesperdicio> todos = resumenDesperdicioRepository.findTop3ByOrderByGramosDesc();
-        return todos.size() > 3 ? todos.subList(0, 3) : todos;
+    public Map<String, Object> obtenerEstadisticasGlobales() {
+        Map<String, Object> stats = new HashMap<>();
+        
+        // SKU más desperdiciado (desde resumen_desperdicio)
+        List<Object[]> skuStats = resumenDesperdicioRepository.findTop3ByOrderByGramosDesc();
+        if (!skuStats.isEmpty()) {
+            stats.put("skuMasDesperdiciado", skuStats.get(0)[0]);
+            stats.put("gramosMasDesperdiciado", skuStats.get(0)[1]);
+        }
+        
+        // Motivo más frecuente (desde resumen_desperdicio)
+        List<Object[]> motivoStats = resumenDesperdicioRepository.findMotivosMasFrecuentesResumen();
+        if (!motivoStats.isEmpty()) {
+            stats.put("motivoMasFrecuente", motivoStats.get(0)[0]);
+            stats.put("vecesMotivo", motivoStats.get(0)[1]);
+        }
+        
+        return stats;
+    }
+    
+    private void actualizarResumenDesperdicio(int idOp, String sku, int cantidadDesperdiciada, String motivo) {
+        // Insertar nuevo registro por cada desperdicio
+        ResumenDesperdicio nuevoResumen = new ResumenDesperdicio(idOp, motivo, sku, cantidadDesperdiciada);
+        resumenDesperdicioRepository.save(nuevoResumen);
+    }
+    
+    public List<Map<String, Object>> obtenerTop3Desperdicios() {
+        List<Object[]> resultados = resumenDesperdicioRepository.findTop3ByOrderByGramosDesc();
+        List<Map<String, Object>> top3 = new java.util.ArrayList<>();
+        
+        int limit = Math.min(3, resultados.size());
+        for (int i = 0; i < limit; i++) {
+            Object[] resultado = resultados.get(i);
+            Map<String, Object> item = new HashMap<>();
+            item.put("sku", resultado[0]);
+            item.put("totalGramos", resultado[1]);
+            top3.add(item);
+        }
+        
+        return top3;
     }
     
     public Optional<MaterialPorOrden> buscarPorOpYSku(int idOp, String sku) {
@@ -194,8 +207,8 @@ public class MaterialPorOrdenService {
             RegistroDesperdicio registro = new RegistroDesperdicio(idOp, sku, cantidadDesperdiciada, motivo, "", estacion, operario);
             registroDesperdicioRepository.save(registro);
             
-            // 4. Actualizar resumen
-            actualizarResumenDesperdicio(idOp);
+            // 4. Insertar en resumen
+            actualizarResumenDesperdicio(idOp, sku, cantidadDesperdiciada, motivo);
             
             return true;
         } catch (Exception e) {

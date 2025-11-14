@@ -166,6 +166,17 @@ public class MaterialPorOpController {
 
         private String estacion;
         private String operario;
+        private java.util.List<MaterialDesperdicio> materiales;
+        
+        public static class MaterialDesperdicio {
+            private String sku;
+            private int desperdicio_gramos;
+            
+            public String getSku() { return sku; }
+            public void setSku(String sku) { this.sku = sku; }
+            public int getDesperdicio_gramos() { return desperdicio_gramos; }
+            public void setDesperdicio_gramos(int desperdicio_gramos) { this.desperdicio_gramos = desperdicio_gramos; }
+        }
 
         // Getters y setters
         public int getIdOp() { return idOp; }
@@ -181,12 +192,24 @@ public class MaterialPorOpController {
         public void setEstacion(String estacion) { this.estacion = estacion; }
         public String getOperario() { return operario; }
         public void setOperario(String operario) { this.operario = operario; }
+        public java.util.List<MaterialDesperdicio> getMateriales() { return materiales; }
+        public void setMateriales(java.util.List<MaterialDesperdicio> materiales) { this.materiales = materiales; }
     }
 
     @PutMapping("/registrar-desperdicio")
     public ResponseEntity<?> registrarDesperdicio(@RequestBody RegistrarDesperdicioRequest request) {
+        System.out.println("=== REGISTRO DESPERDICIO ===");
+        System.out.println("idOp: " + request.getIdOp());
+        System.out.println("sku: " + request.getSku());
+        System.out.println("cantidad: " + request.getCantidadDesperdiciada());
+        System.out.println("motivo: " + request.getMotivo());
+        System.out.println("estacion: " + request.getEstacion());
+        System.out.println("operario: " + request.getOperario());
+        
         if (request.getIdOp() <= 0 || request.getSku() == null || request.getSku().isBlank() || request.getCantidadDesperdiciada() <= 0) {
-            return ResponseEntity.badRequest().body("Datos inválidos: idOp > 0, sku no vacío y cantidadDesperdiciada > 0");
+            String error = "Datos inválidos: idOp=" + request.getIdOp() + ", sku=" + request.getSku() + ", cantidad=" + request.getCantidadDesperdiciada();
+            System.out.println("ERROR VALIDACION: " + error);
+            return ResponseEntity.badRequest().body(error);
         }
 
         try {
@@ -201,11 +224,15 @@ public class MaterialPorOpController {
             );
             
             if (!ok) {
-                return ResponseEntity.badRequest().body("Error al registrar desperdicio");
+                System.out.println("ERROR: registrarDesperdicioCompleto retornó false");
+                return ResponseEntity.badRequest().body("Error al registrar desperdicio - operación falló");
             }
             
+            System.out.println("SUCCESS: Desperdicio registrado correctamente");
             return ResponseEntity.ok("Desperdicio registrado correctamente.");
         } catch (Exception e) {
+            System.out.println("EXCEPTION: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Error al registrar desperdicio: " + e.getMessage());
         }
     }
@@ -221,12 +248,77 @@ public class MaterialPorOpController {
     }
     
     @GetMapping("/top-desperdicios")
-    public ResponseEntity<List<ResumenDesperdicio>> obtenerTopDesperdicios() {
+    public ResponseEntity<List<Map<String, Object>>> obtenerTopDesperdicios() {
         try {
-            List<ResumenDesperdicio> top3 = materialPorOrdenService.obtenerTop3Desperdicios();
+            List<Map<String, Object>> top3 = materialPorOrdenService.obtenerTop3Desperdicios();
             return ResponseEntity.ok(top3);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
+        }
+    }
+    
+    @GetMapping("/reporte-ordenes")
+    public ResponseEntity<List<Map<String, Object>>> obtenerReporteOrdenes() {
+        try {
+            List<Map<String, Object>> reporte = materialPorOrdenService.obtenerReporteOrdenes();
+            return ResponseEntity.ok(reporte);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+    
+    @GetMapping("/estadisticas-globales")
+    public ResponseEntity<Map<String, Object>> obtenerEstadisticasGlobales() {
+        try {
+            Map<String, Object> stats = materialPorOrdenService.obtenerEstadisticasGlobales();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+    
+    @PutMapping("/registrar-desperdicios-lote")
+    public ResponseEntity<?> registrarDesperdiciosLote(@RequestBody RegistrarDesperdicioRequest request) {
+        System.out.println("=== REGISTRO DESPERDICIOS LOTE ===");
+        System.out.println("idOp: " + request.getIdOp());
+        System.out.println("motivo: " + request.getMotivo());
+        System.out.println("materiales: " + (request.getMateriales() != null ? request.getMateriales().size() : 0));
+        
+        if (request.getIdOp() <= 0 || request.getMateriales() == null || request.getMateriales().isEmpty()) {
+            return ResponseEntity.badRequest().body("Datos inválidos: idOp > 0 y materiales no vacío");
+        }
+
+        try {
+            int registrosExitosos = 0;
+            for (RegistrarDesperdicioRequest.MaterialDesperdicio material : request.getMateriales()) {
+                if (material.getDesperdicio_gramos() > 0) {
+                    boolean ok = materialPorOrdenService.registrarDesperdicioCompleto(
+                        request.getIdOp(), 
+                        material.getSku(), 
+                        material.getDesperdicio_gramos(),
+                        request.getMotivo(),
+                        request.getEstacion(),
+                        request.getOperario()
+                    );
+                    
+                    if (ok) {
+                        registrosExitosos++;
+                        System.out.println("SUCCESS: " + material.getSku() + " - " + material.getDesperdicio_gramos() + "g");
+                    } else {
+                        System.out.println("ERROR: " + material.getSku() + " - " + material.getDesperdicio_gramos() + "g");
+                    }
+                }
+            }
+            
+            if (registrosExitosos == 0) {
+                return ResponseEntity.badRequest().body("No se pudo registrar ningún desperdicio");
+            }
+            
+            return ResponseEntity.ok("Desperdicios registrados: " + registrosExitosos + " de " + request.getMateriales().size());
+        } catch (Exception e) {
+            System.out.println("EXCEPTION: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
     

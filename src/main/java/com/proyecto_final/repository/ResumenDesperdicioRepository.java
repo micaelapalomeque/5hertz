@@ -12,6 +12,9 @@ public interface ResumenDesperdicioRepository extends JpaRepository<ResumenDespe
     
     Optional<ResumenDesperdicio> findByIdOp(int idOp);
     
-    @Query("SELECT r FROM ResumenDesperdicio r ORDER BY r.gramosDesperdiciados DESC")
-    List<ResumenDesperdicio> findTop3ByOrderByGramosDesc();
+    @Query("SELECT r.skuMayorDesperdicio, SUM(r.gramosDesperdiciados) FROM ResumenDesperdicio r GROUP BY r.skuMayorDesperdicio ORDER BY SUM(r.gramosDesperdiciados) DESC")
+    List<Object[]> findTop3ByOrderByGramosDesc();
+    
+    @Query("SELECT r.motivoPrincipal, COUNT(r) FROM ResumenDesperdicio r GROUP BY r.motivoPrincipal ORDER BY COUNT(r) DESC")
+    List<Object[]> findMotivosMasFrecuentesResumen();
 }
