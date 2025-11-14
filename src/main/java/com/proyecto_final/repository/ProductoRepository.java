@@ -16,6 +16,9 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
 	
 	@Query("SELECT DISTINCT p FROM Producto p WHERE p.sku IN (SELECT b.skuProductoFinal FROM Bom b)")
 	List<Producto> findProductosConBom();
+	
+	@Query("SELECT p FROM Producto p WHERE p.sku NOT LIKE 'MIX%'")
+	List<Producto> findProductosMateriaPrima();
 	}
 
 

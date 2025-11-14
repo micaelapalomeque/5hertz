@@ -69,4 +69,8 @@ public class ProductoService {
     public List<Producto> obtenerProductosDisponiblesParaStock() {
         return productoRepository.findProductosNoEnStock();
     }
+    
+    public List<Producto> obtenerProductosMateriaPrima() {
+        return productoRepository.findProductosMateriaPrima();
+    }
 }

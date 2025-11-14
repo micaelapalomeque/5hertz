@@ -94,4 +94,9 @@ public class ProductoController {
     public ResponseEntity<List<Producto>> obtenerProductosDisponiblesParaStock() {
         return ResponseEntity.ok(productoService.obtenerProductosDisponiblesParaStock());
     }
+    
+    @GetMapping("/materia-prima")
+    public ResponseEntity<List<Producto>> obtenerProductosMateriaPrima() {
+        return ResponseEntity.ok(productoService.obtenerProductosMateriaPrima());
+    }
 }

@@ -353,6 +353,16 @@ public class MaterialPorOpController {
         }
     }
     
+    @GetMapping("/resumen-orden-registro/{idOp}")
+    public ResponseEntity<Map<String, Object>> obtenerResumenOrdenDesdeRegistro(@PathVariable int idOp) {
+        try {
+            Map<String, Object> resumen = materialPorOrdenService.obtenerResumenDesdeRegistroDesperdicio(idOp);
+            return ResponseEntity.ok(resumen);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+    
     @PutMapping("/consumir-material")
     public ResponseEntity<?> consumirMaterial(@RequestBody RegistrarDesperdicioRequest request) {
         if (request.getIdOp() <= 0 || request.getSku() == null || request.getSku().isBlank() || request.getCantidadDesperdiciada() <= 0) {

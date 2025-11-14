@@ -270,4 +270,44 @@ public class MaterialPorOrdenService {
             return false;
         }
     }
+    
+    public Map<String, Object> obtenerResumenDesdeRegistroDesperdicio(int idOp) {
+        List<RegistroDesperdicio> registros = registroDesperdicioRepository.findByIdOp(idOp);
+        Map<String, Object> resumen = new HashMap<>();
+        
+        if (registros.isEmpty()) {
+            resumen.put("motivoPrincipal", "");
+            resumen.put("skuMayorDesperdicio", "");
+            return resumen;
+        }
+        
+        // Contar motivos
+        Map<String, Integer> motivoCount = new HashMap<>();
+        Map<String, Integer> skuCount = new HashMap<>();
+        
+        for (RegistroDesperdicio registro : registros) {
+            String motivo = registro.getMotivo();
+            String sku = registro.getSku();
+            int cantidad = registro.getCantidadDesperdiciada();
+            
+            motivoCount.put(motivo, motivoCount.getOrDefault(motivo, 0) + 1);
+            skuCount.put(sku, skuCount.getOrDefault(sku, 0) + cantidad);
+        }
+        
+        // Encontrar el más frecuente
+        String motivoMasFrecuente = motivoCount.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("");
+            
+        String skuMasDesperdiciado = skuCount.entrySet().stream()
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse("");
+        
+        resumen.put("motivoPrincipal", motivoMasFrecuente);
+        resumen.put("skuMayorDesperdicio", skuMasDesperdiciado);
+        
+        return resumen;
+    }
 }
