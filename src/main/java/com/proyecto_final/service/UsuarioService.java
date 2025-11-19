@@ -2,6 +2,8 @@ package com.proyecto_final.service;
 
 import com.proyecto_final.model.Usuario;
 import com.proyecto_final.repository.UsuarioRepository;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -10,13 +12,16 @@ import java.util.Optional;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final BCryptPasswordEncoder ENCODER;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, BCryptPasswordEncoder ENCODER) {
         this.usuarioRepository = usuarioRepository;
+        this.ENCODER = ENCODER;
     }
 
     public Optional<Usuario> autenticar(String username, String password) {
-        return usuarioRepository.findByUsernameAndPassword(username, password);
+        return usuarioRepository.findByUsername(username)
+            .filter(u -> ENCODER.matches(password, u.getPassword()));
     }
 
     public List<Usuario> obtenerTodos() {
@@ -37,6 +42,10 @@ public class UsuarioService {
 
     public Usuario crearUsuario(Usuario usuario) {
         return usuarioRepository.save(usuario);
+    }
+    
+    public String encriptarContraseña(String contraseña) {
+    	return ENCODER.encode(contraseña);
     }
 
     public void actualizarEstacionAsignada(int idUsuario, String nuevaEstacion) {
