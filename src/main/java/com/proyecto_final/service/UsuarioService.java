@@ -3,18 +3,19 @@ package com.proyecto_final.service;
 import com.proyecto_final.model.Usuario;
 import com.proyecto_final.repository.UsuarioRepository;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final BCryptPasswordEncoder ENCODER;
+    private final PasswordEncoder ENCODER;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, BCryptPasswordEncoder ENCODER) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder ENCODER) {
         this.usuarioRepository = usuarioRepository;
         this.ENCODER = ENCODER;
     }
