@@ -23,14 +23,14 @@ class CentroProduccionServiceTest {
 
     @Test
     void crearCentro_DatosInvalidos() {
-        assertFalse(service.crearCentro("", "Desc"));
-        assertFalse(service.crearCentro("Sucursal", ""));
+        assertFalse(service.crearCentro("", "Desc", 10.0, 20.0));
+        assertFalse(service.crearCentro("Sucursal", "", 10.0, 20.0));
         verify(repo, never()).save(any());
     }
 
     @Test
     void crearCentro_OK() {
-        boolean ok = service.crearCentro("Sucursal Norte", "Descripción");
+        boolean ok = service.crearCentro("Sucursal Norte", "Descripción", 10.0, 20.0);
         assertTrue(ok);
         verify(repo).save(any(CentroProduccion.class));
     }
