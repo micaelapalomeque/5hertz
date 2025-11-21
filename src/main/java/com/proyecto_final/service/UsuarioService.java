@@ -42,6 +42,10 @@ public class UsuarioService {
     }
 
     public Usuario crearUsuario(Usuario usuario) {
+        // Encriptar la contraseña antes de guardar
+        if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
+            usuario.setPassword(ENCODER.encode(usuario.getPassword()));
+        }
         return usuarioRepository.save(usuario);
     }
     
@@ -77,7 +81,8 @@ public class UsuarioService {
             usuario.setEstacionAsignada(datosActualizados.getEstacionAsignada());
             usuario.setEmail(datosActualizados.getEmail());
             if (datosActualizados.getPassword() != null && !datosActualizados.getPassword().isEmpty()) {
-                usuario.setPassword(datosActualizados.getPassword());
+                // Encriptar la nueva contraseña antes de guardar
+                usuario.setPassword(ENCODER.encode(datosActualizados.getPassword()));
             }
             return usuarioRepository.save(usuario);
         }
