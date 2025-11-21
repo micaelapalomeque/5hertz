@@ -31,10 +31,4 @@ public class CentroProduccion {
 
     @Column(name = "lon")
     private Double lon;
-
-    @Column(name = "lat")
-    private Double lat;
-
-    @Column(name = "lon")
-    private Double lon;
 }
