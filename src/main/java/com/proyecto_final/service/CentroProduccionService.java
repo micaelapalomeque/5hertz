@@ -20,7 +20,7 @@ public class CentroProduccionService {
         return false;
     }
 
-    public boolean crearCentro(String sucursal, String descripcion) {
+    public boolean crearCentro(String sucursal, String descripcion, Double lat, Double lon) {
         if (datosInvalidos(sucursal, descripcion)) {
             return false;
         }
@@ -28,6 +28,8 @@ public class CentroProduccionService {
         CentroProduccion centro = new CentroProduccion();
         centro.setSucursal(sucursal);
         centro.setDescripcion(descripcion);
+        centro.setLat(lat);
+        centro.setLon(lon);
 
         centroProduccionRepository.save(centro);
         return true;

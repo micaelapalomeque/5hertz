@@ -24,8 +24,10 @@ public class CentroProduccionController {
     public ResponseEntity<?> crearCentro(@RequestBody CentroProduccionRequest request) {
 
         boolean ok = centroProduccionService.crearCentro(
-                request.getSucursal(),
-                request.getDescripcion()
+            request.getSucursal(),
+            request.getDescripcion(),
+            request.getLat(),
+            request.getLon()
         );
 
         if (!ok) {

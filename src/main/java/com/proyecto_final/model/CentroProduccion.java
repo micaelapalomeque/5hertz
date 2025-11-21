@@ -25,4 +25,10 @@ public class CentroProduccion {
 
     @Column(name = "descripcion")
     private String descripcion;
+
+    @Column(name = "lat")
+    private Double lat;
+
+    @Column(name = "lon")
+    private Double lon;
 }

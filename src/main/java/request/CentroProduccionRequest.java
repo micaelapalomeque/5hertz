@@ -8,4 +8,6 @@ import lombok.Setter;
 public class CentroProduccionRequest {
     private String sucursal;
     private String descripcion;
+    private Double lat;
+    private Double lon;
 }
