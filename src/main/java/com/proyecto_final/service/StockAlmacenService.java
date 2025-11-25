@@ -67,6 +67,24 @@ public class StockAlmacenService {
         return true;
     }
 
+    public boolean asignarSector(String sku, int idAlmacen, Integer idSector) {
+        if (sku == null || sku.isBlank() || idAlmacen <= 0) return false;
+
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlmacen);
+        if (opt.isEmpty()) return false;
+
+        StockAlmacen stock = opt.get();
+        stock.setIdSectorTemplate(idSector);
+        stockAlmacenRepository.save(stock);
+        return true;
+    }
+
+    public Integer obtenerSectorParaStock(String sku, int idAlmacen) {
+        Optional<StockAlmacen> opt = obtenerRegistro(sku, idAlmacen);
+        if (opt.isEmpty()) return null;
+        return opt.get().getIdSectorTemplate();
+    }
+
     public boolean habilitarProducto(int idAlmacen, String sku) {
         if (sku == null || sku.isBlank() || idAlmacen <= 0) {
             return false;

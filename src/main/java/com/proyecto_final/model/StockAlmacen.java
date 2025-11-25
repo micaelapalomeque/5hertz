@@ -35,6 +35,9 @@ public class StockAlmacen {
     @Column(name = "stock_total")
     private int stockTotal = 0;
 
+    @Column(name = "id_sector_template")
+    private Integer idSectorTemplate;
+
     public StockAlmacen(int idAlmacen, String sku, int cantidadMinima, int stockReservado, int stockDisponible, int stockTotal) {
         this.idAlmacen = idAlmacen;
         this.sku = sku;

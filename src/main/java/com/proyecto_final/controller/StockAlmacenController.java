@@ -7,15 +7,20 @@ import com.proyecto_final.model.StockAlmacen;
 import com.proyecto_final.service.StockAlmacenService;
 import request.HabilitarProductoRequest;
 import request.ModificarStockRequest;
+import request.AsignarSectorRequest;
+import com.proyecto_final.service.SectorTemplateService;
+import com.proyecto_final.model.SectorTemplate;
 
 @RestController
 @RequestMapping("/stock")
 public class StockAlmacenController {
 
     private final StockAlmacenService stockAlmacenService;
+    private final SectorTemplateService sectorTemplateService;
 
-    public StockAlmacenController(StockAlmacenService stockAlmacenService) {
+    public StockAlmacenController(StockAlmacenService stockAlmacenService, SectorTemplateService sectorTemplateService) {
         this.stockAlmacenService = stockAlmacenService;
+        this.sectorTemplateService = sectorTemplateService;
     }
 
     @PutMapping("/habilitar-producto")
@@ -110,5 +115,24 @@ public class StockAlmacenController {
 
         return ResponseEntity.ok("Cantidad minima actualizada correctamente.");
     }
-}
 
+    @GetMapping("/sector")
+    public ResponseEntity<?> obtenerSectorParaStock(@RequestParam String sku, @RequestParam int idAlmacen) {
+        Integer idSector = stockAlmacenService.obtenerSectorParaStock(sku, idAlmacen);
+        if (idSector == null) return ResponseEntity.ok().body(null);
+
+        SectorTemplate sector = sectorTemplateService.buscarPorId(idSector);
+        if (sector == null) return ResponseEntity.ok().body(null);
+
+        return ResponseEntity.ok(sector);
+    }
+
+    @PostMapping("/asignar-sector")
+    public ResponseEntity<?> asignarSector(@RequestBody AsignarSectorRequest request) {
+        boolean ok = stockAlmacenService.asignarSector(request.getSku(), request.getIdAlmacen(), request.getIdSector());
+        if (!ok) {
+            return ResponseEntity.badRequest().body("No se pudo asignar sector. Verifica sku e idAlmacen.");
+        }
+        return ResponseEntity.ok("Sector asignado correctamente.");
+    }
+}

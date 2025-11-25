@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.proyecto_final.model.Almacen;
 import com.proyecto_final.service.AlmacenService;
+import com.proyecto_final.service.SectorTemplateService;
+import com.proyecto_final.model.SectorTemplate;
+import java.util.List;
 
 import request.AlmacenRequest;
 
@@ -15,9 +18,11 @@ import request.AlmacenRequest;
 public class AlmacenController {
 
     private final AlmacenService almacenService;
+    private final SectorTemplateService sectorTemplateService;
 
-    public AlmacenController(AlmacenService almacenService) {
+    public AlmacenController(AlmacenService almacenService, SectorTemplateService sectorTemplateService) {
         this.almacenService = almacenService;
+        this.sectorTemplateService = sectorTemplateService;
     }
 
     @PostMapping
@@ -40,5 +45,11 @@ public class AlmacenController {
     @GetMapping
     public ResponseEntity<List<Almacen>> obtenerTodos() {
         return ResponseEntity.ok(almacenService.obtenerTodos());
+    }
+
+    @GetMapping("/{idAlmacen}/sectors")
+    public ResponseEntity<List<SectorTemplate>> obtenerSectores(@PathVariable int idAlmacen) {
+        List<SectorTemplate> sectores = sectorTemplateService.obtenerTodos();
+        return ResponseEntity.ok(sectores);
     }
 }
