@@ -135,4 +135,19 @@ public class StockAlmacenController {
         }
         return ResponseEntity.ok("Sector asignado correctamente.");
     }
+@DeleteMapping("/eliminar")
+public ResponseEntity<?> eliminarProductoDeAlmacen(
+        @RequestParam String sku,
+        @RequestParam int idAlmacen) {
+
+    boolean ok = stockAlmacenService.eliminarProducto(sku, idAlmacen);
+
+    if (!ok) {
+        return ResponseEntity.badRequest()
+                .body("No se pudo eliminar el producto del almacén.");
+    }
+
+    return ResponseEntity.ok("Producto eliminado correctamente.");
+}
+
 }

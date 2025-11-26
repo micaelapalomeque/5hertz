@@ -14,4 +14,6 @@ public interface StockAlmacenRepository extends JpaRepository<StockAlmacen, Inte
     List<StockAlmacen> findByIdAlmacen(int idAlmacen);
 
     Optional<StockAlmacen> findBySkuAndIdAlmacen(String sku, int idAlmacen);
+
+    void deleteBySkuAndIdAlmacen(String sku, int idAlmacen);
 }

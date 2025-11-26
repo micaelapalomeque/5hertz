@@ -183,4 +183,16 @@ public class StockAlmacenService {
         movimientoStockService.registrarMovimiento(idAlacen, sku, cantidad, tipoConsumicion);
         return true;
     }
+public boolean eliminarProducto(String sku, int idAlmacen) {
+    Optional<StockAlmacen> stockOpt =
+            stockAlmacenRepository.findBySkuAndIdAlmacen(sku, idAlmacen);
+
+    if (stockOpt.isEmpty()) return false;
+
+    stockAlmacenRepository.delete(stockOpt.get());
+    return true;
+}
+
+
+
 }
