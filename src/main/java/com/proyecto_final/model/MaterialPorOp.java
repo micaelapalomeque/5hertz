@@ -28,7 +28,7 @@ public class MaterialPorOp {
     private int cantidadConsumida = 0;
     
     @Column(name = "cantidad_desperdiciada")
-    private int cantidadDesperdiciada = 0;
+    private Integer cantidadDesperdiciada = 0;
     
     @Column(name = "cantidad_pendiente")
     private int cantidadPendiente;
